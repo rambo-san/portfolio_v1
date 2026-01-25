@@ -87,11 +87,11 @@ export function Leaderboard({ gameId, gameName, limit = 10 }: LeaderboardProps) 
                 ) : (
                     entries.map((entry, index) => {
                         const rank = index + 1;
-                        const isCurrentUser = user?.uid === entry.oderId;
+                        const isCurrentUser = user?.uid === entry.userId;
 
                         return (
                             <motion.div
-                                key={`${entry.oderId}-${index}`}
+                                key={`${entry.userId}-${index}`}
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.05 }}
