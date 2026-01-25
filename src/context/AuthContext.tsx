@@ -31,7 +31,7 @@ interface AuthContextType {
     // RBAC helpers
     checkRole: (requiredRole: UserRole) => Promise<boolean>;
     isAdmin: boolean;
-    isUser: boolean;
+    isPlayer: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -156,7 +156,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateDisplayName: handleUpdateDisplayName,
         checkRole,
         isAdmin: profile?.role === 'admin',
-        isUser: profile?.role === 'user' || profile?.role === 'admin',
+        isPlayer: profile?.role === 'player' || profile?.role === 'admin',
     };
 
     return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
