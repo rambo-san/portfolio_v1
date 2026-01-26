@@ -72,7 +72,7 @@ export default async function RootLayout({
             --secondary: ${config.colors.secondary};
             --card: ${config.colors.surface};
             --text-muted: ${config.colors.textMuted};
-            --border: rgba(${primaryRgb}, 0.15);
+            --border: rgb(${primaryRgb} / 0.15);
           }
           html {
             background-color: ${config.colors.background};
