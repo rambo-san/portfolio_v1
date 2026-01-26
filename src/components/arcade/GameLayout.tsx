@@ -160,10 +160,10 @@ export function GameLayout({ children, gameId, gameName, currentScore = 0, score
                 {!isFullscreen && (
                     <div className="w-full lg:w-80 flex-shrink-0 flex flex-col gap-4">
                         {/* Live Score Card */}
-                        <div className="p-4 md:p-5 bg-gradient-to-br from-violet-500/10 via-fuchsia-500/5 to-transparent border border-white/10 rounded-2xl relative overflow-hidden">
+                        <div className="p-4 md:p-5 bg-primary/10 border border-white/10 rounded-2xl relative overflow-hidden">
                             {/* Background glow effect */}
                             <div className={cn(
-                                "absolute inset-0 bg-gradient-to-r from-violet-500/20 to-fuchsia-500/20 blur-xl transition-opacity duration-500",
+                                "absolute inset-0 bg-primary/20 blur-xl transition-opacity duration-500",
                                 currentScore > 0 ? "opacity-50" : "opacity-0"
                             )} />
 

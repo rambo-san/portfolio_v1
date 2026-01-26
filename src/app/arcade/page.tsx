@@ -7,6 +7,9 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useGuestName } from "@/context/GuestNameContext";
 import { AuthModal } from "@/components/auth/AuthModal";
+import { Button } from "@/components/ui/button";
+
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 const games = [
     {
@@ -34,13 +37,22 @@ const games = [
 ];
 
 export default function Arcade() {
-    const { user, loading } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+    const { config, loading: configLoading } = useSiteConfig();
     const { guestName, setGuestName, hasGuestName } = useGuestName();
     const [nameInput, setNameInput] = useState("");
     const [showAuthModal, setShowAuthModal] = useState(false);
 
-    // Show guest name prompt only if not logged in and no guest name set
-    const showGuestNamePrompt = !loading && !user && !hasGuestName;
+    const loading = authLoading || configLoading;
+
+    // Game settings from config
+    const { allowGuestPlay, showLeaderboard } = config.gameSettings;
+
+    // Show guest name prompt only if not logged in, guest play is allowed, and no guest name set
+    const showGuestNamePrompt = !loading && !user && !hasGuestName && allowGuestPlay;
+
+    // If guest play is NOT allowed and user is NOT logged in, we should probably show a login required message
+    const loginRequired = !loading && !user && !allowGuestPlay;
 
     const handleSetGuestName = () => {
         if (nameInput.trim().length >= 2) {
@@ -59,11 +71,11 @@ export default function Arcade() {
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="inline-flex items-center justify-center p-6 rounded-full bg-red-500/10 mb-8 border border-red-500/20 shadow-[0_0_50px_rgba(220,38,38,0.2)]"
+                            className="inline-flex items-center justify-center p-6 rounded-full bg-primary/10 mb-8 border border-primary/20 shadow-[0_0_50px_rgba(var(--primary-rgb),0.2)]"
                         >
-                            <Gamepad2 size={64} className="text-red-500" />
+                            <Gamepad2 size={64} className="text-primary" />
                         </motion.div>
-                        <h1 className="text-5xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-red-500 via-white to-red-400 mb-6">
+                        <h1 className="text-5xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary via-white to-primary/80 mb-6">
                             Engineering Arcade
                         </h1>
                         <p className="text-slate-400 max-w-2xl mx-auto text-lg">
@@ -71,20 +83,20 @@ export default function Arcade() {
                         </p>
 
                         {/* Player Status */}
-                        {!loading && (user || hasGuestName) && (
+                        {!loading && (user || (hasGuestName && allowGuestPlay)) && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10"
                             >
-                                <User size={16} className="text-violet-400" />
+                                <User size={16} className="text-primary" />
                                 <span className="text-white">
-                                    Playing as <span className="font-semibold text-violet-400">{displayName}</span>
+                                    Playing as <span className="font-semibold text-primary">{displayName}</span>
                                 </span>
                                 {!user && (
                                     <button
                                         onClick={() => setShowAuthModal(true)}
-                                        className="ml-2 text-xs text-gray-400 hover:text-violet-400 transition-colors flex items-center gap-1"
+                                        className="ml-2 text-xs text-gray-400 hover:text-primary transition-colors flex items-center gap-1"
                                     >
                                         <LogIn size={12} />
                                         Sign in to save scores
@@ -104,13 +116,12 @@ export default function Arcade() {
                                 className="max-w-md mx-auto mb-12"
                             >
                                 <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 p-8 text-center relative overflow-hidden">
-                                    {/* Decorative orbs */}
-                                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-violet-500/20 rounded-full blur-3xl" />
-                                    <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-red-500/20 rounded-full blur-3xl" />
+                                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
+                                    <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
 
                                     <div className="relative z-10">
-                                        <div className="w-16 h-16 rounded-full bg-violet-500/20 flex items-center justify-center mx-auto mb-4">
-                                            <User size={32} className="text-violet-400" />
+                                        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                                            <User size={32} className="text-primary" />
                                         </div>
                                         <h2 className="text-xl font-bold text-white mb-2">Welcome to the Arcade!</h2>
                                         <p className="text-gray-400 text-sm mb-6">
@@ -124,16 +135,16 @@ export default function Arcade() {
                                                 onChange={(e) => setNameInput(e.target.value)}
                                                 onKeyDown={(e) => e.key === "Enter" && handleSetGuestName()}
                                                 placeholder="Enter your name"
-                                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 text-center"
+                                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-center"
                                                 autoFocus
                                             />
-                                            <button
+                                            <Button
                                                 onClick={handleSetGuestName}
                                                 disabled={nameInput.trim().length < 2}
-                                                className="w-full py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="w-full"
                                             >
                                                 Play as Guest
-                                            </button>
+                                            </Button>
 
                                             <div className="flex items-center gap-4 my-4">
                                                 <div className="flex-1 h-px bg-gray-700" />
@@ -141,17 +152,43 @@ export default function Arcade() {
                                                 <div className="flex-1 h-px bg-gray-700" />
                                             </div>
 
-                                            <button
+                                            <Button
+                                                variant="outline"
                                                 onClick={() => setShowAuthModal(true)}
-                                                className="w-full py-3 bg-white/5 hover:bg-white/10 border border-gray-700 text-white font-medium rounded-xl transition-all flex items-center justify-center gap-2"
+                                                className="w-full"
                                             >
                                                 <LogIn size={18} />
                                                 Sign in with Google
-                                            </button>
-                                            <p className="text-gray-500 text-xs">
-                                                Sign in to save your scores to the leaderboard
-                                            </p>
+                                            </Button>
                                         </div>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
+
+                        {loginRequired && (
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="max-w-md mx-auto mb-12"
+                            >
+                                <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 p-8 text-center relative overflow-hidden">
+                                    <div className="relative z-10">
+                                        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                                            <LogIn size={32} className="text-primary" />
+                                        </div>
+                                        <h2 className="text-xl font-bold text-white mb-2">Login Required</h2>
+                                        <p className="text-gray-400 text-sm mb-6">
+                                            Guest play is currently disabled. Please sign in to access the arcade and save your progress.
+                                        </p>
+
+                                        <Button
+                                            onClick={() => setShowAuthModal(true)}
+                                            className="w-full shadow-[0_0_20px_rgba(var(--primary-rgb),0.3)]"
+                                        >
+                                            <LogIn size={18} />
+                                            Sign in with Google
+                                        </Button>
                                     </div>
                                 </div>
                             </motion.div>
@@ -159,7 +196,7 @@ export default function Arcade() {
                     </AnimatePresence>
 
                     {/* Games Grid - only show when user has a name or is logged in */}
-                    {(user || hasGuestName) && (
+                    {(user || (hasGuestName && allowGuestPlay)) && (
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
@@ -171,7 +208,7 @@ export default function Arcade() {
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: i * 0.1 }}
-                                    className={`rounded-3xl bg-white/5 border border-white/10 p-8 flex flex-col ${game.status !== "Active" ? "opacity-50 grayscale" : "hover:bg-white/10 hover:border-red-500/50 hover:shadow-[0_0_30px_rgba(220,38,38,0.15)]"} transition-all duration-300 group`}
+                                    className={`rounded-3xl bg-white/5 border border-white/10 p-8 flex flex-col ${game.status !== "Active" ? "opacity-50 grayscale" : "hover:bg-white/10 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)]"} transition-all duration-300 group`}
                                 >
                                     <div className="flex justify-between items-start mb-6">
                                         <div
@@ -184,56 +221,56 @@ export default function Arcade() {
                                         >
                                             {game.difficulty}
                                         </div>
-                                        {game.status === "Active" && <Flame className="text-red-500 animate-pulse" size={24} />}
+                                        {game.status === "Active" && <Flame className="text-primary animate-pulse" size={24} />}
                                     </div>
 
-                                    <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-red-400 transition-colors">{game.title}</h3>
+                                    <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-primary transition-colors">{game.title}</h3>
                                     <p className="text-slate-400 text-sm mb-8 flex-1 leading-relaxed">{game.description}</p>
 
                                     <div className="mt-auto">
                                         {game.status === "Active" ? (
-                                            <Link
-                                                href={`/arcade/${game.id}`}
-                                                className="block w-full py-4 bg-red-700 hover:bg-red-600 text-white font-bold text-center rounded-xl transition-all shadow-lg shadow-red-900/40 active:scale-95"
-                                            >
-                                                PLAY NOW
+                                            <Link href={`/arcade/${game.id}`} className="block">
+                                                <Button className="w-full py-6 text-lg font-bold">
+                                                    PLAY NOW
+                                                </Button>
                                             </Link>
                                         ) : (
-                                            <button disabled className="block w-full py-4 bg-white/5 text-white/20 font-bold text-center rounded-xl cursor-not-allowed border border-white/5">
+                                            <Button disabled variant="outline" className="w-full py-6 text-lg font-bold opacity-50">
                                                 COMING SOON
-                                            </button>
+                                            </Button>
                                         )}
                                     </div>
                                 </motion.div>
                             ))}
 
                             {/* Leaderboard Teaser */}
-                            <div className="rounded-3xl bg-gradient-to-br from-red-900/20 to-black border border-red-500/20 p-8 flex flex-col justify-center items-center text-center relative overflow-hidden">
-                                <div className="absolute inset-0 bg-red-500/5 animate-pulse rounded-3xl" />
-                                <Trophy size={56} className="text-yellow-500 mb-6 relative z-10 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
-                                <h3 className="text-xl font-bold mb-2 relative z-10">Global Leaderboard</h3>
-                                <p className="text-slate-400 text-sm mb-6 relative z-10">Compete with other players for the high score.</p>
-                                <div className="w-full bg-black/40 border border-white/5 rounded-xl p-4 relative z-10 backdrop-blur-sm">
-                                    <div className="flex justify-between text-xs text-slate-500 mb-3 tracking-widest">
-                                        <span>RANK</span>
-                                        <span>SCORE</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm font-mono text-white mb-2 border-b border-white/5 pb-2">
-                                        <span>1. ALX_99</span>
-                                        <span className="text-red-500">99,420</span>
-                                    </div>
-                                    <div className="flex justify-between text-sm font-mono text-white/60">
-                                        <span>2. DEV_OPS</span>
-                                        <span className="text-red-500">88,100</span>
+                            {showLeaderboard && (
+                                <div className="rounded-3xl bg-gradient-to-br from-primary/10 to-black border border-primary/20 p-8 flex flex-col justify-center items-center text-center relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-3xl" />
+                                    <Trophy size={56} className="text-yellow-500 mb-6 relative z-10 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
+                                    <h3 className="text-xl font-bold mb-2 relative z-10">Global Leaderboard</h3>
+                                    <p className="text-slate-400 text-sm mb-6 relative z-10">Compete with other players for the high score.</p>
+                                    <div className="w-full bg-black/40 border border-white/5 rounded-xl p-4 relative z-10 backdrop-blur-sm">
+                                        <div className="flex justify-between text-xs text-slate-500 mb-3 tracking-widest">
+                                            <span>RANK</span>
+                                            <span>SCORE</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm font-mono text-white mb-2 border-b border-white/5 pb-2">
+                                            <span>1. ALX_99</span>
+                                            <span className="text-primary">99,420</span>
+                                        </div>
+                                        <div className="flex justify-between text-sm font-mono text-white/60">
+                                            <span>2. DEV_OPS</span>
+                                            <span className="text-primary">88,100</span>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            )}
                         </motion.div>
                     )}
                 </div>
             </div>
 
-            {/* Auth Modal */}
             <AuthModal isOpen={showAuthModal} onClose={() => setShowAuthModal(false)} />
         </>
     );

@@ -51,7 +51,7 @@ export function TopBar() {
                                         className="w-8 h-8 rounded-lg object-contain"
                                     />
                                 ) : (
-                                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
+                                    <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white">
                                         <Sparkles size={18} />
                                     </div>
                                 )}

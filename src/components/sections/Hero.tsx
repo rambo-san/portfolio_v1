@@ -14,7 +14,7 @@ export function Hero() {
 
     return (
         <section id="home" className="min-h-[90vh] flex flex-col justify-center items-center text-center px-4 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(220,38,38,0.1)_0%,transparent_70%)] pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(var(--primary-rgb),0.1)_0%,transparent_70%)] pointer-events-none" />
 
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -23,9 +23,9 @@ export function Hero() {
                 className="mb-6"
             >
                 {loading ? (
-                    <Skeleton className="h-6 w-64 rounded bg-red-950/30 border border-red-800/10" />
+                    <Skeleton className="h-6 w-64 rounded bg-primary/10 border border-primary/5" />
                 ) : (
-                    <h2 className="text-red-400 font-mono tracking-widest uppercase text-xs md:text-sm bg-red-950/30 px-3 py-1 rounded border border-red-800/50 inline-block">
+                    <h2 className="text-primary font-mono tracking-widest uppercase text-xs md:text-sm bg-primary/10 px-3 py-1 rounded border border-primary/20 inline-block">
                         {hero.tagline}
                     </h2>
                 )}
@@ -48,7 +48,7 @@ export function Hero() {
                         {hero.titleHighlight && (
                             <>
                                 <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-600">
+                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
                                     {hero.titleHighlight}
                                 </span>
                             </>
@@ -83,13 +83,13 @@ export function Hero() {
                 className="flex flex-col sm:flex-row gap-6 items-center"
             >
                 <Link href={hero.ctaLink}>
-                    <Button size="lg" className="rounded-full px-8 h-12 text-base font-semibold tracking-wide bg-gradient-to-r from-red-600 to-red-800 hover:from-red-500 hover:to-red-700 border-none">
+                    <Button size="lg" variant="default" className="rounded-full px-8 h-12 text-base font-semibold tracking-wide">
                         {hero.ctaText} <ArrowRight className="ml-2 w-4 h-4" />
                     </Button>
                 </Link>
                 {hero.secondaryCtaText && hero.secondaryCtaLink && (
                     <Link href={hero.secondaryCtaLink}>
-                        <Button variant="neon" size="lg" className="rounded-full px-8 h-12 text-base font-semibold tracking-wide shadow-[0_0_20px_-5px_rgba(220,38,38,0.5)] !text-red-400 !border-red-500 hover:!bg-red-950/30">
+                        <Button variant="neon" size="lg" className="rounded-full px-8 h-12 text-base font-semibold tracking-wide shadow-[0_0_20px_-5px_rgba(var(--primary-rgb),0.5)]">
                             <Gamepad2 className="mr-2 w-5 h-5" /> {hero.secondaryCtaText}
                         </Button>
                     </Link>

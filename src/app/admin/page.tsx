@@ -20,6 +20,7 @@ import {
     updateFriend,
     deleteFriend,
 } from '@/lib/firebase/siteConfig';
+import { Button } from '@/components/ui/button';
 import {
     Settings,
     Palette,
@@ -40,14 +41,50 @@ import {
     Upload,
 } from 'lucide-react';
 import { uploadImage } from '@/lib/firebase/storage';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type TabType = 'general' | 'colors' | 'content' | 'projects' | 'friends' | 'games' | 'social';
 
 export default function AdminDashboard() {
     return (
-        <ProtectedRoute requiredRole="admin">
+        <ProtectedRoute requiredRole="admin" loadingFallback={<DashboardSkeleton />}>
             <AdminContent />
         </ProtectedRoute>
+    );
+}
+
+function DashboardSkeleton() {
+    return (
+        <div className="min-h-screen py-8 px-4">
+            <div className="max-w-6xl mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                    <div className="space-y-2">
+                        <Skeleton className="h-10 w-64" />
+                        <Skeleton className="h-4 w-48 opacity-50" />
+                    </div>
+                    <div className="flex gap-3">
+                        <Skeleton className="h-10 w-24 rounded-lg" />
+                        <Skeleton className="h-10 w-24 rounded-lg" />
+                        <Skeleton className="h-10 w-32 rounded-lg" />
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <div className="lg:col-span-1">
+                        <div className="bg-gray-900/50 rounded-xl border border-gray-700/50 p-2 space-y-2">
+                            {[1, 2, 3, 4, 5, 6].map((i) => (
+                                <Skeleton key={i} className="h-12 w-full rounded-lg" />
+                            ))}
+                        </div>
+                    </div>
+                    <div className="lg:col-span-3">
+                        <div className="bg-gray-900/50 rounded-xl border border-gray-700/50 p-6">
+                            <TabSkeleton />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }
 
@@ -123,13 +160,6 @@ function AdminContent() {
         { id: 'social', label: 'Social', icon: LinkIcon },
     ] as const;
 
-    if (isLoading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-screen py-8 px-4">
@@ -167,7 +197,7 @@ function AdminContent() {
                             className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-all ${saveSuccess
                                 ? 'bg-green-600 text-white'
                                 : hasChanges
-                                    ? 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white shadow-lg shadow-violet-500/25'
+                                    ? 'bg-primary hover:brightness-110 text-white shadow-lg shadow-primary/25'
                                     : 'bg-gray-700 text-gray-400 cursor-not-allowed'
                                 }`}
                         >
@@ -193,7 +223,7 @@ function AdminContent() {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id
-                                        ? 'bg-violet-500/20 text-violet-400 border border-violet-500/30'
+                                        ? 'bg-primary/20 text-primary border border-primary/30'
                                         : 'text-gray-400 hover:text-white hover:bg-white/5'
                                         }`}
                                 >
@@ -212,44 +242,50 @@ function AdminContent() {
                             animate={{ opacity: 1, y: 0 }}
                             className="bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6"
                         >
-                            {activeTab === 'general' && (
-                                <GeneralTab config={config} updateConfig={updateConfig} />
-                            )}
-                            {activeTab === 'colors' && (
-                                <ColorsTab
-                                    colors={config.colors}
-                                    updateColors={(colors) => updateNestedConfig('colors', colors)}
-                                />
-                            )}
-                            {activeTab === 'content' && (
-                                <ContentTab
-                                    config={config}
-                                    updateHero={(hero) => updateNestedConfig('hero', hero)}
-                                    updateAbout={(about) => updateNestedConfig('about', about)}
-                                    updateProjects={(projects) => updateNestedConfig('projects', projects)}
-                                    updateFriends={(friends) => updateNestedConfig('friends', friends)}
-                                    updateContact={(contact) => updateNestedConfig('contact', contact)}
-                                />
-                            )}
-                            {activeTab === 'projects' && (
-                                <ProjectsTab />
-                            )}
-                            {activeTab === 'friends' && (
-                                <FriendsTab />
-                            )}
-                            {activeTab === 'games' && (
-                                <GamesTab
-                                    settings={config.gameSettings}
-                                    updateSettings={(settings) =>
-                                        updateNestedConfig('gameSettings', settings)
-                                    }
-                                />
-                            )}
-                            {activeTab === 'social' && (
-                                <SocialTab
-                                    links={config.socialLinks}
-                                    updateLinks={(links) => updateNestedConfig('socialLinks', links)}
-                                />
+                            {isLoading ? (
+                                <TabSkeleton />
+                            ) : (
+                                <>
+                                    {activeTab === 'general' && (
+                                        <GeneralTab config={config} updateConfig={updateConfig} />
+                                    )}
+                                    {activeTab === 'colors' && (
+                                        <ColorsTab
+                                            colors={config.colors}
+                                            updateColors={(colors) => updateNestedConfig('colors', colors)}
+                                        />
+                                    )}
+                                    {activeTab === 'content' && (
+                                        <ContentTab
+                                            config={config}
+                                            updateHero={(hero) => updateNestedConfig('hero', hero)}
+                                            updateAbout={(about) => updateNestedConfig('about', about)}
+                                            updateProjects={(projects) => updateNestedConfig('projects', projects)}
+                                            updateFriends={(friends) => updateNestedConfig('friends', friends)}
+                                            updateContact={(contact) => updateNestedConfig('contact', contact)}
+                                        />
+                                    )}
+                                    {activeTab === 'projects' && (
+                                        <ProjectsTab />
+                                    )}
+                                    {activeTab === 'friends' && (
+                                        <FriendsTab />
+                                    )}
+                                    {activeTab === 'games' && (
+                                        <GamesTab
+                                            settings={config.gameSettings}
+                                            updateSettings={(settings) =>
+                                                updateNestedConfig('gameSettings', settings)
+                                            }
+                                        />
+                                    )}
+                                    {activeTab === 'social' && (
+                                        <SocialTab
+                                            links={config.socialLinks}
+                                            updateLinks={(links) => updateNestedConfig('socialLinks', links)}
+                                        />
+                                    )}
+                                </>
                             )}
                         </motion.div>
                     </div>
@@ -260,6 +296,41 @@ function AdminContent() {
 }
 
 // ==================== TAB COMPONENTS ====================
+function TabSkeleton() {
+    return (
+        <div className="space-y-6">
+            <Skeleton className="h-8 w-48 mb-6" />
+            <div className="space-y-6">
+                {[1, 2, 3].map((i) => (
+                    <div key={i} className="space-y-3 p-4 bg-white/5 rounded-xl border border-white/5">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-10 w-full rounded-lg" />
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+function SkeletonList() {
+    return (
+        <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+                <div key={i} className="p-4 bg-white/5 rounded-lg border border-gray-700/50 flex items-center justify-between">
+                    <div className="space-y-2 flex-1">
+                        <Skeleton className="h-5 w-1/3" />
+                        <Skeleton className="h-4 w-2/3" />
+                    </div>
+                    <div className="flex gap-2 ml-4">
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+}
+
 
 function GeneralTab({
     config,
@@ -299,7 +370,7 @@ function GeneralTab({
                         type="text"
                         value={config.siteName}
                         onChange={(e) => updateConfig({ siteName: e.target.value })}
-                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     />
                 </div>
 
@@ -311,7 +382,7 @@ function GeneralTab({
                         value={config.siteDescription}
                         onChange={(e) => updateConfig({ siteDescription: e.target.value })}
                         rows={3}
-                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 resize-none"
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none"
                     />
                 </div>
 
@@ -326,7 +397,7 @@ function GeneralTab({
                                 value={config.logoUrl || ''}
                                 onChange={(e) => updateConfig({ logoUrl: e.target.value })}
                                 placeholder="https://example.com/logo.png"
-                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                             />
                         </div>
                         <div className="relative">
@@ -343,7 +414,7 @@ function GeneralTab({
                                 className={`flex items-center justify-center p-3 bg-white/10 hover:bg-white/20 border border-gray-700 rounded-lg cursor-pointer transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {isUploading ? (
-                                    <Loader2 size={24} className="animate-spin text-violet-500" />
+                                    <Loader2 size={24} className="animate-spin text-gray-500" />
                                 ) : (
                                     <Upload size={24} className="text-gray-300" />
                                 )}
@@ -405,7 +476,7 @@ function ColorsTab({
                                 type="text"
                                 value={colors[field.key]}
                                 onChange={(e) => updateColors({ [field.key]: e.target.value })}
-                                className="flex-1 px-3 py-2 bg-black/30 border border-gray-700 rounded text-white font-mono text-sm focus:outline-none focus:border-violet-500"
+                                className="flex-1 px-3 py-2 bg-black/30 border border-gray-700 rounded text-white font-mono text-sm focus:outline-none focus:border-primary"
                             />
                         </div>
                     </div>
@@ -421,18 +492,17 @@ function ColorsTab({
                     This is how your colors will look together.
                 </p>
                 <div className="flex gap-3">
-                    <button
-                        className="px-4 py-2 rounded-lg font-medium text-white"
+                    <Button
+                        variant="default"
                         style={{ background: `linear-gradient(to right, ${colors.primary}, ${colors.secondary})` }}
                     >
                         Primary Button
-                    </button>
-                    <button
-                        className="px-4 py-2 rounded-lg font-medium border"
-                        style={{ borderColor: colors.primary, color: colors.primary }}
+                    </Button>
+                    <Button
+                        variant="neon"
                     >
                         Secondary Button
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
@@ -482,7 +552,7 @@ function ContentTab({
                             value={config.hero.tagline || ''}
                             onChange={(e) => updateHero({ tagline: e.target.value })}
                             placeholder="e.g., System Architect & Full Stack Engineer"
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -494,7 +564,7 @@ function ContentTab({
                                 type="text"
                                 value={config.hero.title}
                                 onChange={(e) => updateHero({ title: e.target.value })}
-                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                             />
                         </div>
                         <div>
@@ -506,7 +576,7 @@ function ContentTab({
                                 value={config.hero.titleHighlight || ''}
                                 onChange={(e) => updateHero({ titleHighlight: e.target.value })}
                                 placeholder="e.g., That Scale"
-                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                             />
                         </div>
                     </div>
@@ -518,7 +588,7 @@ function ContentTab({
                             value={config.hero.subtitle}
                             onChange={(e) => updateHero({ subtitle: e.target.value })}
                             rows={2}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500 resize-none"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
                         />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
@@ -530,7 +600,7 @@ function ContentTab({
                                 type="text"
                                 value={config.hero.ctaText}
                                 onChange={(e) => updateHero({ ctaText: e.target.value })}
-                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                             />
                         </div>
                         <div>
@@ -541,7 +611,7 @@ function ContentTab({
                                 type="text"
                                 value={config.hero.ctaLink}
                                 onChange={(e) => updateHero({ ctaLink: e.target.value })}
-                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                             />
                         </div>
                     </div>
@@ -555,7 +625,7 @@ function ContentTab({
                                 value={config.hero.secondaryCtaText || ''}
                                 onChange={(e) => updateHero({ secondaryCtaText: e.target.value })}
                                 placeholder="e.g., Enter Arcade"
-                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                             />
                         </div>
                         <div>
@@ -567,7 +637,7 @@ function ContentTab({
                                 value={config.hero.secondaryCtaLink || ''}
                                 onChange={(e) => updateHero({ secondaryCtaLink: e.target.value })}
                                 placeholder="e.g., /arcade"
-                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                             />
                         </div>
                     </div>
@@ -586,7 +656,7 @@ function ContentTab({
                             type="text"
                             value={config.about.title}
                             onChange={(e) => updateAbout({ title: e.target.value })}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                         />
                     </div>
                     <div>
@@ -597,7 +667,7 @@ function ContentTab({
                             value={config.about.description}
                             onChange={(e) => updateAbout({ description: e.target.value })}
                             rows={4}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500 resize-none"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
                         />
                     </div>
                     <div>
@@ -609,7 +679,7 @@ function ContentTab({
                             value={config.about.skillsLabel || 'Core Competencies'}
                             onChange={(e) => updateAbout({ skillsLabel: e.target.value })}
                             placeholder="e.g., Core Competencies"
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                         />
                     </div>
                     <div>
@@ -620,7 +690,7 @@ function ContentTab({
                             {config.about.skills.map((skill, index) => (
                                 <span
                                     key={index}
-                                    className="inline-flex items-center gap-1 px-3 py-1 bg-violet-500/20 text-violet-400 rounded-full text-sm"
+                                    className="inline-flex items-center gap-1 px-3 py-1 bg-primary/20 text-primary rounded-full text-sm"
                                 >
                                     {skill}
                                     <button
@@ -639,11 +709,11 @@ function ContentTab({
                                 onChange={(e) => setNewSkill(e.target.value)}
                                 onKeyDown={(e) => e.key === 'Enter' && addSkill()}
                                 placeholder="Add a skill..."
-                                className="flex-1 px-4 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                                className="flex-1 px-4 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                             />
                             <button
                                 onClick={addSkill}
-                                className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors"
+                                className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-lg transition-colors"
                             >
                                 Add
                             </button>
@@ -664,7 +734,7 @@ function ContentTab({
                             type="text"
                             value={config.projects?.title || 'Featured Projects'}
                             onChange={(e) => updateProjects({ title: e.target.value })}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                         />
                     </div>
                     <div>
@@ -675,7 +745,7 @@ function ContentTab({
                             value={config.projects?.subtitle || ''}
                             onChange={(e) => updateProjects({ subtitle: e.target.value })}
                             rows={2}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500 resize-none"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
                         />
                     </div>
                     <p className="text-sm text-gray-400">
@@ -696,7 +766,7 @@ function ContentTab({
                             type="text"
                             value={config.friends?.title || 'Cool People I Know'}
                             onChange={(e) => updateFriends({ title: e.target.value })}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                         />
                     </div>
                     <div>
@@ -707,7 +777,7 @@ function ContentTab({
                             value={config.friends?.subtitle || ''}
                             onChange={(e) => updateFriends({ subtitle: e.target.value })}
                             rows={2}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500 resize-none"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
                         />
                     </div>
                     <p className="text-sm text-gray-400">
@@ -728,7 +798,7 @@ function ContentTab({
                             type="text"
                             value={config.contact?.title || 'Ready to collaborate?'}
                             onChange={(e) => updateContact({ title: e.target.value })}
-                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                         />
                     </div>
                 </div>
@@ -772,25 +842,21 @@ function ProjectsTab() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-white">Manage Projects</h2>
-                <button
-                    onClick={() => setIsAdding(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors"
-                >
-                    <Plus size={18} />
-                    Add Project
-                </button>
+                {loading ? (
+                    <Skeleton className="h-10 w-32 rounded-lg" />
+                ) : (
+                    <Button
+                        onClick={() => setIsAdding(true)}
+                        className="flex items-center gap-2"
+                    >
+                        <Plus size={18} />
+                        Add Project
+                    </Button>
+                )}
             </div>
 
             {isAdding && (
@@ -808,45 +874,49 @@ function ProjectsTab() {
                 />
             )}
 
-            <div className="space-y-4">
-                {projects.length === 0 ? (
-                    <p className="text-gray-400 text-center py-8">
-                        No projects yet. Add your first project!
-                    </p>
-                ) : (
-                    projects.map((project) => (
-                        <div
-                            key={project.id}
-                            className="p-4 bg-white/5 rounded-lg border border-gray-700 flex items-center justify-between"
-                        >
-                            <div>
-                                <h3 className="font-medium text-white">{project.title}</h3>
-                                <p className="text-sm text-gray-400 line-clamp-1">{project.description}</p>
-                                <div className="flex gap-2 mt-2">
-                                    {project.featured && (
-                                        <span className="text-xs px-2 py-0.5 bg-violet-500/20 text-violet-400 rounded">Featured</span>
-                                    )}
-                                    <span className="text-xs text-gray-500">Order: {project.order}</span>
+            {loading ? (
+                <SkeletonList />
+            ) : (
+                <div className="space-y-4">
+                    {projects.length === 0 ? (
+                        <p className="text-gray-400 text-center py-8">
+                            No projects yet. Add your first project!
+                        </p>
+                    ) : (
+                        projects.map((project) => (
+                            <div
+                                key={project.id}
+                                className="p-4 bg-white/5 rounded-lg border border-gray-700 flex items-center justify-between"
+                            >
+                                <div>
+                                    <h3 className="font-medium text-white">{project.title}</h3>
+                                    <p className="text-sm text-gray-400 line-clamp-1">{project.description}</p>
+                                    <div className="flex gap-2 mt-2">
+                                        {project.featured && (
+                                            <span className="text-xs px-2 py-0.5 bg-primary/20 text-primary rounded">Featured</span>
+                                        )}
+                                        <span className="text-xs text-gray-500">Order: {project.order}</span>
+                                    </div>
+                                </div>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setEditingProject(project)}
+                                        className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                    >
+                                        <Edit3 size={18} />
+                                    </button>
+                                    <button
+                                        onClick={() => handleDeleteProject(project.id!)}
+                                        className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                    >
+                                        <Trash2 size={18} />
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setEditingProject(project)}
-                                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                                >
-                                    <Edit3 size={18} />
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteProject(project.id!)}
-                                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
+                        ))
+                    )}
+                </div>
+            )}
         </div>
     );
 }
@@ -899,7 +969,7 @@ function ProjectForm({
                         type="text"
                         value={formData.title}
                         onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
                 </div>
                 <div>
@@ -908,7 +978,7 @@ function ProjectForm({
                         type="number"
                         value={formData.order}
                         onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
                 </div>
             </div>
@@ -919,7 +989,7 @@ function ProjectForm({
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500 resize-none"
+                    className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
                 />
             </div>
 
@@ -931,7 +1001,7 @@ function ProjectForm({
                         value={formData.demoUrl}
                         onChange={(e) => setFormData({ ...formData, demoUrl: e.target.value })}
                         placeholder="https://..."
-                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
                 </div>
                 <div>
@@ -941,7 +1011,7 @@ function ProjectForm({
                         value={formData.githubUrl}
                         onChange={(e) => setFormData({ ...formData, githubUrl: e.target.value })}
                         placeholder="https://github.com/..."
-                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
                 </div>
             </div>
@@ -950,7 +1020,7 @@ function ProjectForm({
                 <label className="block text-sm text-gray-300 mb-1">Tags</label>
                 <div className="flex flex-wrap gap-2 mb-2">
                     {formData.tags.map((tag, index) => (
-                        <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-violet-500/20 text-violet-400 rounded text-sm">
+                        <span key={index} className="inline-flex items-center gap-1 px-2 py-1 bg-primary/20 text-primary rounded text-sm">
                             {tag}
                             <button onClick={() => removeTag(index)} className="hover:text-red-400">×</button>
                         </span>
@@ -963,9 +1033,9 @@ function ProjectForm({
                         onChange={(e) => setNewTag(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
                         placeholder="Add tag..."
-                        className="flex-1 px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                        className="flex-1 px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
-                    <button onClick={addTag} className="px-3 py-2 bg-violet-600 text-white rounded-lg">Add</button>
+                    <button onClick={addTag} className="px-3 py-2 bg-primary text-white rounded-lg">Add</button>
                 </div>
             </div>
 
@@ -975,7 +1045,7 @@ function ProjectForm({
                         type="checkbox"
                         checked={formData.featured}
                         onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                        className="w-4 h-4 rounded border-gray-600 bg-white/5 text-violet-600 focus:ring-violet-500"
+                        className="w-4 h-4 rounded border-gray-600 bg-white/5 text-primary focus:ring-primary"
                     />
                     <span className="text-sm text-gray-300">Featured on home page</span>
                 </label>
@@ -987,7 +1057,7 @@ function ProjectForm({
                 </button>
                 <button
                     onClick={() => onSubmit(formData)}
-                    className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors"
+                    className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-lg transition-colors"
                 >
                     {project ? 'Save Changes' : 'Add Project'}
                 </button>
@@ -1031,14 +1101,6 @@ function FriendsTab() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-6 h-6 text-violet-500 animate-spin" />
-            </div>
-        );
-    }
-
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -1046,77 +1108,85 @@ function FriendsTab() {
                     <h2 className="text-xl font-bold text-white">Manage Friends</h2>
                     <p className="text-sm text-gray-400">Add cool people you know to your portfolio</p>
                 </div>
-                <button
-                    onClick={() => setIsAdding(true)}
-                    className="flex items-center gap-2 px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors"
-                >
-                    <Plus size={18} />
-                    Add Friend
-                </button>
-            </div>
-
-            {isAdding && (
-                <FriendForm
-                    onSubmit={handleAddFriend}
-                    onCancel={() => setIsAdding(false)}
-                />
-            )}
-
-            {editingFriend && (
-                <FriendForm
-                    friend={editingFriend}
-                    onSubmit={(updates) => handleUpdateFriend(editingFriend.id!, updates)}
-                    onCancel={() => setEditingFriend(null)}
-                />
-            )}
-
-            <div className="space-y-4">
-                {friends.length === 0 ? (
-                    <p className="text-gray-400 text-center py-8">
-                        No friends added yet. Add your first friend!
-                    </p>
+                {loading ? (
+                    <Skeleton className="h-10 w-32 rounded-lg" />
                 ) : (
-                    friends.map((friend) => (
-                        <div
-                            key={friend.id}
-                            className="p-4 bg-white/5 rounded-lg border border-gray-700 flex items-center justify-between"
-                        >
-                            <div className="flex items-center gap-4">
-                                {friend.avatarUrl ? (
-                                    <img
-                                        src={friend.avatarUrl}
-                                        alt={friend.name}
-                                        className="w-12 h-12 rounded-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white font-bold">
-                                        {friend.name.charAt(0).toUpperCase()}
-                                    </div>
-                                )}
-                                <div>
-                                    <h3 className="font-medium text-white">{friend.name}</h3>
-                                    <p className="text-sm text-gray-400 line-clamp-1">{friend.description}</p>
-                                    <span className="text-xs text-gray-500">Order: {friend.order}</span>
-                                </div>
-                            </div>
-                            <div className="flex gap-2">
-                                <button
-                                    onClick={() => setEditingFriend(friend)}
-                                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                                >
-                                    <Edit3 size={18} />
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteFriend(friend.id!)}
-                                    className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                                >
-                                    <Trash2 size={18} />
-                                </button>
-                            </div>
-                        </div>
-                    ))
+                    <Button
+                        onClick={() => setIsAdding(true)}
+                        className="flex items-center gap-2"
+                    >
+                        <Plus size={18} />
+                        Add Friend
+                    </Button>
                 )}
             </div>
+
+            {loading ? <SkeletonList /> : (
+                <>
+                    {isAdding && (
+                        <FriendForm
+                            onSubmit={handleAddFriend}
+                            onCancel={() => setIsAdding(false)}
+                        />
+                    )}
+
+                    {editingFriend && (
+                        <FriendForm
+                            friend={editingFriend}
+                            onSubmit={(updates) => handleUpdateFriend(editingFriend.id!, updates)}
+                            onCancel={() => setEditingFriend(null)}
+                        />
+                    )}
+
+                    <div className="space-y-4">
+                        {friends.length === 0 ? (
+                            <p className="text-gray-400 text-center py-8">
+                                No friends added yet. Add your first friend!
+                            </p>
+                        ) : (
+                            friends.map((friend) => (
+                                <div
+                                    key={friend.id}
+                                    className="p-4 bg-white/5 rounded-lg border border-gray-700 flex items-center justify-between"
+                                >
+                                    <div className="flex items-center gap-4">
+                                        {friend.avatarUrl ? (
+                                            <img
+                                                src={friend.avatarUrl}
+                                                alt={friend.name}
+                                                className="w-12 h-12 rounded-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                                                {friend.name.charAt(0).toUpperCase()}
+                                            </div>
+                                        )}
+                                        <div>
+                                            <h3 className="font-medium text-white">{friend.name}</h3>
+                                            <p className="text-sm text-gray-400 line-clamp-1">{friend.description}</p>
+                                            <span className="text-xs text-gray-500">Order: {friend.order}</span>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => setEditingFriend(friend)}
+                                            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                                        >
+                                            <Edit3 size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDeleteFriend(friend.id!)}
+                                            className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                                        >
+                                            <Trash2 size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                </>
+            )}
         </div>
     );
 }
@@ -1187,7 +1257,7 @@ function FriendForm({
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                         placeholder="Friend's name"
-                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
                 </div>
                 <div>
@@ -1196,7 +1266,7 @@ function FriendForm({
                         type="number"
                         value={formData.order}
                         onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
-                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
                 </div>
             </div>
@@ -1208,7 +1278,7 @@ function FriendForm({
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                     rows={2}
                     placeholder="A short description about your friend"
-                    className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500 resize-none"
+                    className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
                 />
             </div>
 
@@ -1221,7 +1291,7 @@ function FriendForm({
                             value={formData.avatarUrl}
                             onChange={(e) => setFormData({ ...formData, avatarUrl: e.target.value })}
                             placeholder="https://..."
-                            className="flex-1 px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                            className="flex-1 px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                         />
                         <div className="relative">
                             <input
@@ -1237,7 +1307,7 @@ function FriendForm({
                                 className={`flex items-center justify-center p-2 bg-white/10 hover:bg-white/20 border border-gray-700 rounded-lg cursor-pointer transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
                                 {isUploading ? (
-                                    <Loader2 size={20} className="animate-spin text-violet-500" />
+                                    <Loader2 size={20} className="animate-spin text-gray-500" />
                                 ) : (
                                     <Upload size={20} className="text-gray-300" />
                                 )}
@@ -1252,7 +1322,7 @@ function FriendForm({
                         value={formData.portfolioUrl}
                         onChange={(e) => setFormData({ ...formData, portfolioUrl: e.target.value })}
                         placeholder="https://..."
-                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-violet-500"
+                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
                     />
                 </div>
             </div>
@@ -1265,35 +1335,35 @@ function FriendForm({
                         value={formData.socialLinks.github || ''}
                         onChange={(e) => updateSocialLink('github', e.target.value)}
                         placeholder="GitHub URL"
-                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-violet-500"
+                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-primary"
                     />
                     <input
                         type="url"
                         value={formData.socialLinks.linkedin || ''}
                         onChange={(e) => updateSocialLink('linkedin', e.target.value)}
                         placeholder="LinkedIn URL"
-                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-violet-500"
+                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-primary"
                     />
                     <input
                         type="url"
                         value={formData.socialLinks.twitter || ''}
                         onChange={(e) => updateSocialLink('twitter', e.target.value)}
                         placeholder="Twitter URL"
-                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-violet-500"
+                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-primary"
                     />
                     <input
                         type="url"
                         value={formData.socialLinks.instagram || ''}
                         onChange={(e) => updateSocialLink('instagram', e.target.value)}
                         placeholder="Instagram URL"
-                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-violet-500"
+                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-primary"
                     />
                     <input
                         type="url"
                         value={formData.socialLinks.website || ''}
                         onChange={(e) => updateSocialLink('website', e.target.value)}
                         placeholder="Website URL"
-                        className="px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-violet-500 col-span-2"
+                        className="w-full px-3 py-2 bg-white/5 border border-gray-700 rounded-lg text-white text-sm focus:outline-none focus:border-primary"
                     />
                 </div>
             </div>
@@ -1304,7 +1374,7 @@ function FriendForm({
                 </button>
                 <button
                     onClick={() => onSubmit(formData)}
-                    className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white rounded-lg transition-colors"
+                    className="px-4 py-2 bg-primary hover:brightness-110 text-white rounded-lg transition-colors"
                 >
                     {friend ? 'Save Changes' : 'Add Friend'}
                 </button>
@@ -1428,7 +1498,7 @@ function GamesTab({
                 <button
                     onClick={() => setActiveSubTab('settings')}
                     className={`px-4 py-2 rounded-lg font-medium transition-all ${activeSubTab === 'settings'
-                        ? 'bg-violet-600 text-white'
+                        ? 'bg-primary text-white'
                         : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                 >
@@ -1437,7 +1507,7 @@ function GamesTab({
                 <button
                     onClick={() => setActiveSubTab('games')}
                     className={`px-4 py-2 rounded-lg font-medium transition-all ${activeSubTab === 'games'
-                        ? 'bg-violet-600 text-white'
+                        ? 'bg-primary text-white'
                         : 'bg-white/5 text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                 >
@@ -1477,8 +1547,8 @@ function GamesTab({
                         onChange={(checked) => updateSettings({ requireLoginForLeaderboard: checked })}
                     />
 
-                    <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-                        <p className="text-blue-400 text-sm">
+                    <div className="mt-6 p-4 bg-white/5 border border-white/10 rounded-lg">
+                        <p className="text-gray-400 text-sm">
                             <strong>Note:</strong> When guest play is enabled, guests can play games but their scores won&apos;t be saved to the database.
                         </p>
                     </div>
@@ -1490,9 +1560,7 @@ function GamesTab({
                     <h2 className="text-xl font-bold text-white mb-4">Arcade Games</h2>
 
                     {loadingGames ? (
-                        <div className="flex items-center justify-center py-12">
-                            <Loader2 className="w-8 h-8 text-violet-500 animate-spin" />
-                        </div>
+                        <SkeletonList />
                     ) : (
                         <div className="space-y-3">
                             {games.map((game) => (
@@ -1506,8 +1574,8 @@ function GamesTab({
                                         className="w-full flex items-center justify-between p-4 hover:bg-white/5 transition-all"
                                     >
                                         <div className="flex items-center gap-4">
-                                            <div className="p-2 rounded-lg bg-violet-500/10">
-                                                <Gamepad2 size={24} className="text-violet-400" />
+                                            <div className="p-2 rounded-lg bg-white/5 border border-white/5">
+                                                <Gamepad2 size={24} className="text-gray-400" />
                                             </div>
                                             <div className="text-left">
                                                 <h3 className="font-bold text-white">{game.name}</h3>
@@ -1542,7 +1610,7 @@ function GamesTab({
                                                             </button>
                                                         </div>
                                                     ) : (
-                                                        <label className="flex items-center justify-center h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-violet-500 transition-colors">
+                                                        <label className="flex items-center justify-center h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-primary transition-colors">
                                                             <input
                                                                 type="file"
                                                                 accept="image/*"
@@ -1550,7 +1618,7 @@ function GamesTab({
                                                                 className="hidden"
                                                             />
                                                             {uploadingImage?.gameId === game.id && uploadingImage.type === 'skillIssueImage' ? (
-                                                                <Loader2 size={20} className="animate-spin text-violet-400" />
+                                                                <Loader2 size={20} className="animate-spin text-gray-500" />
                                                             ) : (
                                                                 <Upload size={20} className="text-gray-500" />
                                                             )}
@@ -1572,7 +1640,7 @@ function GamesTab({
                                                             </button>
                                                         </div>
                                                     ) : (
-                                                        <label className="flex items-center justify-center h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-violet-500 transition-colors">
+                                                        <label className="flex items-center justify-center h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-primary transition-colors">
                                                             <input
                                                                 type="file"
                                                                 accept="image/*"
@@ -1580,7 +1648,7 @@ function GamesTab({
                                                                 className="hidden"
                                                             />
                                                             {uploadingImage?.gameId === game.id && uploadingImage.type === 'congratsImage' ? (
-                                                                <Loader2 size={20} className="animate-spin text-violet-400" />
+                                                                <Loader2 size={20} className="animate-spin text-gray-500" />
                                                             ) : (
                                                                 <Upload size={20} className="text-gray-500" />
                                                             )}
@@ -1602,7 +1670,7 @@ function GamesTab({
                                                             </button>
                                                         </div>
                                                     ) : (
-                                                        <label className="flex items-center justify-center h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-violet-500 transition-colors">
+                                                        <label className="flex items-center justify-center h-24 border-2 border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-primary transition-colors">
                                                             <input
                                                                 type="file"
                                                                 accept="image/*"
@@ -1610,7 +1678,7 @@ function GamesTab({
                                                                 className="hidden"
                                                             />
                                                             {uploadingImage?.gameId === game.id && uploadingImage.type === 'thumbnailImage' ? (
-                                                                <Loader2 size={20} className="animate-spin text-violet-400" />
+                                                                <Loader2 size={20} className="animate-spin text-gray-500" />
                                                             ) : (
                                                                 <Upload size={20} className="text-gray-500" />
                                                             )}
@@ -1679,7 +1747,7 @@ function SocialTab({
                         value={links.github || ''}
                         onChange={(e) => updateLinks({ github: e.target.value })}
                         placeholder="https://github.com/username"
-                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
                     />
                 </div>
 
@@ -1692,7 +1760,7 @@ function SocialTab({
                         value={links.linkedin || ''}
                         onChange={(e) => updateLinks({ linkedin: e.target.value })}
                         placeholder="https://linkedin.com/in/username"
-                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
                     />
                 </div>
 
@@ -1705,7 +1773,7 @@ function SocialTab({
                         value={links.twitter || ''}
                         onChange={(e) => updateLinks({ twitter: e.target.value })}
                         placeholder="https://twitter.com/username"
-                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
                     />
                 </div>
 
@@ -1718,7 +1786,7 @@ function SocialTab({
                         value={links.instagram || ''}
                         onChange={(e) => updateLinks({ instagram: e.target.value })}
                         placeholder="https://instagram.com/username"
-                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
                     />
                 </div>
 
@@ -1731,7 +1799,7 @@ function SocialTab({
                         value={links.email || ''}
                         onChange={(e) => updateLinks({ email: e.target.value })}
                         placeholder="hello@example.com"
-                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-violet-500"
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary"
                     />
                 </div>
             </div>
@@ -1759,7 +1827,7 @@ function ToggleSetting({
             </div>
             <button
                 onClick={() => onChange(!checked)}
-                className={`relative w-12 h-6 rounded-full transition-colors ${checked ? 'bg-violet-600' : 'bg-gray-700'
+                className={`relative w-12 h-6 rounded-full transition-colors ${checked ? 'bg-primary' : 'bg-gray-700'
                     }`}
             >
                 <motion.div

@@ -5,10 +5,13 @@ import { SiteConfigProvider } from '@/context/SiteConfigContext';
 import { GuestNameProvider } from '@/context/GuestNameContext';
 import { GameModeProvider } from '@/context/GameModeContext';
 
+import { ThemeInitializer } from '@/components/ThemeInitializer';
+
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <AuthProvider>
             <SiteConfigProvider>
+                <ThemeInitializer />
                 <GuestNameProvider>
                     <GameModeProvider>{children}</GameModeProvider>
                 </GuestNameProvider>

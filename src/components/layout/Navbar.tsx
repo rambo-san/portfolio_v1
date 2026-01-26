@@ -91,7 +91,7 @@ export function Navbar() {
                     className={cn(
                         "absolute top-1.5 bottom-1.5 rounded-full -z-0",
                         activeItem?.special
-                            ? "bg-gradient-to-tr from-red-600 to-red-500 shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+                            ? "bg-primary shadow-[0_0_15px_rgba(var(--primary-rgb),0.5)]"
                             : "bg-white/10 border border-white/10"
                     )}
                     animate={{
@@ -117,13 +117,13 @@ export function Navbar() {
                             className={cn(
                                 "relative flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-colors duration-200 z-10",
                                 isActive ? "text-white" : "text-slate-400 hover:text-slate-200",
-                                !isActive && item.special && "text-red-400 hover:text-red-300"
+                                !isActive && item.special && "text-primary hover:brightness-110"
                             )}
                         >
                             <item.icon
                                 size={18}
                                 className={cn(
-                                    item.special && "drop-shadow-[0_0_5px_rgba(220,38,38,0.8)]"
+                                    item.special && "drop-shadow-[0_0_5px_rgba(var(--primary-rgb),0.8)]"
                                 )}
                             />
                             <span className="hidden md:block">{item.name}</span>

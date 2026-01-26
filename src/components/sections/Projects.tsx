@@ -9,11 +9,10 @@ import { useEffect, useState } from "react";
 import { Project, subscribeProjects } from "@/lib/firebase/siteConfig";
 
 const projectColors = [
-    { color: "from-red-900/40 to-black", border: "hover:border-red-500/30" },
-    { color: "from-orange-900/40 to-black", border: "hover:border-orange-500/30" },
-    { color: "from-stone-900/40 to-black", border: "hover:border-stone-500/30" },
-    { color: "from-violet-900/40 to-black", border: "hover:border-violet-500/30" },
-    { color: "from-blue-900/40 to-black", border: "hover:border-blue-500/30" },
+    { color: "from-primary/20 to-black", border: "hover:border-primary/30" },
+    { color: "from-secondary/20 to-black", border: "hover:border-secondary/30" },
+    { color: "from-primary/10 to-black", border: "hover:border-primary/20" },
+    { color: "from-secondary/10 to-black", border: "hover:border-secondary/20" },
 ];
 
 export function Projects() {

@@ -9,6 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useGuestName } from "@/context/GuestNameContext";
 import { useGameData } from "@/hooks/useGameData";
 import { GameLayout } from "@/components/arcade/GameLayout";
+import { useSiteConfig } from "@/context/SiteConfigContext";
 
 type GameState = "READY" | "PLAYING" | "GAME_OVER";
 
@@ -71,8 +72,13 @@ export default function FlappyDilluPage() {
     const gameStartTime = useRef<number>(0);
 
     const { user } = useAuth();
+    const { config } = useSiteConfig();
     const { guestName } = useGuestName();
     const { saveScore, getLeaderboard } = useGameData();
+
+    // Theme and settings from config
+    const { primary: primaryColor } = config.colors;
+    const { requireLoginForLeaderboard } = config.gameSettings;
 
     const [gameState, setGameState] = useState<GameState>("READY");
     const [score, setScore] = useState(0);
@@ -88,7 +94,7 @@ export default function FlappyDilluPage() {
     const isLoggedIn = !!user;
 
     // Game state refs
-    const birdY = useRef(CANVAS_HEIGHT / 2);
+    const birdY = useRef(300);
     const birdVelocity = useRef(0);
     const pipes = useRef<Pipe[]>([]);
     const scoreRef = useRef(0);
@@ -218,7 +224,7 @@ export default function FlappyDilluPage() {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.code === "Space" || e.code === "ArrowUp") {
                 e.preventDefault();
-                if (gameState === "GAME_OVER") {
+                if (gameStateRef.current === "GAME_OVER") {
                     gameOverSpaceCount.current += 1;
                     if (gameOverSpaceCount.current >= 2) {
                         restartGame();
@@ -231,7 +237,7 @@ export default function FlappyDilluPage() {
 
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [jump, gameState, restartGame]);
+    }, [jump, restartGame]);
 
     const handleCanvasClick = useCallback(() => {
         jump();
@@ -247,8 +253,6 @@ export default function FlappyDilluPage() {
             birdImageRef.current = img;
         };
     }, []);
-
-    // ... (rest of renderFrame logic)
 
     // Render function updated to use dynamic dimensions
     const renderFrame = useCallback((ctx: CanvasRenderingContext2D) => {
@@ -267,7 +271,7 @@ export default function FlappyDilluPage() {
 
         // Grid pattern (responsive spacing)
         const gridSize = Math.max(20, Math.min(width, height) * 0.04);
-        ctx.strokeStyle = "rgba(220, 38, 38, 0.05)";
+        ctx.strokeStyle = `rgba(var(--primary-rgb), 0.05)`;
         ctx.lineWidth = 1;
         for (let x = 0; x < width; x += gridSize) {
             ctx.beginPath();
@@ -283,29 +287,24 @@ export default function FlappyDilluPage() {
         }
 
         // Pipes
-        ctx.fillStyle = "#dc2626";
+        ctx.fillStyle = primaryColor;
         pipes.current.forEach((pipe) => {
             const currentGap = pipe.gapSize || getPipeGap(baseGap, minGap, 0);
 
             ctx.fillRect(pipe.x, 0, pipeWidth, pipe.gapY);
             ctx.fillRect(pipe.x, pipe.gapY + currentGap, pipeWidth, height - pipe.gapY - currentGap);
 
-            ctx.fillStyle = "#991b1b";
+            ctx.fillStyle = "rgba(0, 0, 0, 0.3)";
             // Cap (5% of pipe width for overhang)
             const capOverhang = pipeWidth * 0.1;
             const capHeight = pipeWidth * 0.25;
             ctx.fillRect(pipe.x - capOverhang, pipe.gapY - capHeight, pipeWidth + capOverhang * 2, capHeight);
             ctx.fillRect(pipe.x - capOverhang, pipe.gapY + currentGap, pipeWidth + capOverhang * 2, capHeight);
-            ctx.fillStyle = "#dc2626";
+            ctx.fillStyle = primaryColor;
         });
 
         // Bird Calculation
         const birdYPos = birdY.current;
-
-        // HITBOX: 60% of visual size for forgiving collisions
-        const HITBOX_SCALE = 0.6;
-        const hitboxSize = birdSize * HITBOX_SCALE;
-        const hitboxOffset = (birdSize - hitboxSize) / 2;
 
         if (birdImageRef.current) {
             const img = birdImageRef.current;
@@ -331,7 +330,7 @@ export default function FlappyDilluPage() {
             ctx.fillStyle = "#fbbf24";
             ctx.fill();
         }
-    }, []);
+    }, [primaryColor]);
 
     // Main game loop updated
     useEffect(() => {
@@ -399,7 +398,7 @@ export default function FlappyDilluPage() {
                 setGameOverType('normal');
             }
 
-            if (user && finalScore > 0) {
+            if ((user || !requireLoginForLeaderboard) && finalScore > 0) {
                 const sessionId = await saveScore(GAME_ID, GAME_NAME, finalScore, duration);
                 if (sessionId) {
                     setScoreSaved(true);
@@ -499,10 +498,8 @@ export default function FlappyDilluPage() {
         gameLoopRef.current = requestAnimationFrame(gameLoop);
 
         return cleanup;
-    }, [gameState, highScore, renderFrame, user, saveScore, getLeaderboard]); // Added getLeaderboard dependency logic
+    }, [gameState, highScore, renderFrame, user, saveScore, getLeaderboard, requireLoginForLeaderboard]);
 
-
-    const showCanvas = gameState === "READY" || gameState === "PLAYING";
 
     return (
         <GameLayout
@@ -556,17 +553,17 @@ export default function FlappyDilluPage() {
                             <div className="flex flex-col items-center w-[90%] max-w-sm md:max-w-md relative z-20">
                                 {/* CARD CONTENT BASED ON TYPE */}
                                 {gameOverType === 'skill_issue' ? (
-                                    <div className="relative w-full aspect-[3/4] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-2xl border border-red-500/30 mb-4 md:mb-6 group">
+                                    <div className="relative w-full aspect-[3/4] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden shadow-2xl border border-primary/30 mb-4 md:mb-6 group">
                                         {/* Full Background Image */}
-                                        <div className="absolute inset-0 bg-red-900/20">
+                                        <div className="absolute inset-0 bg-primary/20">
                                             <img src="/resource/flappy_dillu/dillu_flappy_skill_issue.png" alt="Skill Issue" className="w-full h-full object-cover object-top" />
                                         </div>
 
                                         {/* Gradient Overlay */}
                                         <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/80 to-transparent flex flex-col justify-end p-6 md:p-8 text-center">
-                                            <h2 className="text-4xl md:text-5xl font-black text-red-500 mb-2 drop-shadow-[0_4px_4px_rgba(0,0,0,1)] tracking-tighter">SKILL ISSUE</h2>
-                                            <div className="bg-red-500/20 backdrop-blur-md px-4 py-1 md:px-6 md:py-2 rounded-full border border-red-500/40 inline-flex items-center justify-center gap-2 mx-auto mb-3 md:mb-4">
-                                                <span className="text-red-200 font-bold tracking-widest text-xs md:text-sm">SCORE: 0</span>
+                                            <h2 className="text-4xl md:text-5xl font-black text-primary mb-2 drop-shadow-[0_4px_4px_rgba(0,0,0,1)] tracking-tighter">SKILL ISSUE</h2>
+                                            <div className="bg-primary/20 backdrop-blur-md px-4 py-1 md:px-6 md:py-2 rounded-full border border-primary/40 inline-flex items-center justify-center gap-2 mx-auto mb-3 md:mb-4">
+                                                <span className="text-white font-bold tracking-widest text-xs md:text-sm">SCORE: 0</span>
                                             </div>
                                             <p className="text-white/70 italic text-xs md:text-sm font-medium">"Don't worry bro, it happens."</p>
                                         </div>

@@ -9,6 +9,7 @@ interface ProtectedRouteProps {
     children: React.ReactNode;
     requiredRole?: UserRole;
     fallback?: React.ReactNode;
+    loadingFallback?: React.ReactNode;
 }
 
 /**
@@ -19,15 +20,18 @@ export function ProtectedRoute({
     children,
     requiredRole = 'player',
     fallback,
+    loadingFallback,
 }: ProtectedRouteProps) {
     const { user, profile, loading } = useAuth();
 
     // Loading state
     if (loading) {
+        if (loadingFallback) return <>{loadingFallback}</>;
+
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
                 <div className="text-center">
-                    <Loader2 className="w-8 h-8 text-violet-500 animate-spin mx-auto mb-4" />
+                    <Loader2 className="w-8 h-8 text-gray-500 animate-spin mx-auto mb-4" />
                     <p className="text-gray-400">Loading...</p>
                 </div>
             </div>
@@ -41,8 +45,8 @@ export function ProtectedRoute({
         return (
             <div className="min-h-[60vh] flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto px-4">
-                    <div className="w-16 h-16 bg-violet-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <Lock className="w-8 h-8 text-violet-400" />
+                    <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Lock className="w-8 h-8 text-primary" />
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-2">
                         Sign In Required

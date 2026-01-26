@@ -59,7 +59,7 @@ export function About() {
                                         {about.skills.map((skill, index) => (
                                             <span
                                                 key={index}
-                                                className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-medium text-slate-300 hover:bg-white/10 hover:border-red-500/50 hover:text-white transition-all cursor-default"
+                                                className="px-4 py-2 bg-white/5 border border-white/10 rounded-full text-sm font-medium text-slate-300 hover:bg-white/10 hover:border-primary/50 hover:text-white transition-all cursor-default"
                                             >
                                                 {skill}
                                             </span>

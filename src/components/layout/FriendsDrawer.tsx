@@ -105,14 +105,14 @@ export function FriendsDrawer() {
                                                         className="w-full h-full rounded-full object-cover border-2 border-white/10"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-lg font-bold">
+                                                    <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white text-lg font-bold">
                                                         {friend.name.charAt(0).toUpperCase()}
                                                     </div>
                                                 )}
                                             </div>
 
                                             <div className="flex-1 min-w-0 text-left">
-                                                <h3 className={`font-medium truncate ${isExpanded ? 'text-violet-400' : 'text-slate-200'}`}>
+                                                <h3 className={`font-medium truncate ${isExpanded ? 'text-primary' : 'text-slate-200'}`}>
                                                     {friend.name}
                                                 </h3>
                                                 <p className="text-xs text-slate-500 truncate">

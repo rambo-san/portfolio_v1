@@ -95,7 +95,7 @@ export function Leaderboard({ gameId, gameName, limit = 10 }: LeaderboardProps) 
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: index * 0.05 }}
-                                className={`flex items-center gap-4 p-3 rounded-xl border transition-all ${getRankBackground(rank)} ${isCurrentUser ? 'ring-2 ring-violet-500/50' : ''
+                                className={`flex items-center gap-4 p-3 rounded-xl border transition-all ${getRankBackground(rank)} ${isCurrentUser ? 'ring-2 ring-primary/50' : ''
                                     }`}
                             >
                                 {/* Rank */}
@@ -109,7 +109,7 @@ export function Leaderboard({ gameId, gameName, limit = 10 }: LeaderboardProps) 
                                         className="w-10 h-10 rounded-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-semibold">
+                                    <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold">
                                         {entry.displayName[0]?.toUpperCase() || <User size={18} />}
                                     </div>
                                 )}

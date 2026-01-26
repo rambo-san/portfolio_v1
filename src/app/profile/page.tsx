@@ -77,7 +77,7 @@ export default function ProfilePage() {
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-sm">
                     <div className="flex flex-col md:flex-row items-center gap-8 mb-8">
                         {/* Avatar */}
-                        <div className="w-32 h-32 rounded-full border-4 border-violet-500/20 overflow-hidden shadow-xl">
+                        <div className="w-32 h-32 rounded-full border-4 border-primary/20 overflow-hidden shadow-xl">
                             {user.photoURL ? (
                                 <img
                                     src={user.photoURL}
@@ -85,7 +85,7 @@ export default function ProfilePage() {
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-4xl font-bold">
+                                <div className="w-full h-full bg-primary flex items-center justify-center text-white text-4xl font-bold">
                                     {(user.displayName || user.email || 'U')[0].toUpperCase()}
                                 </div>
                             )}
@@ -97,7 +97,7 @@ export default function ProfilePage() {
                             <p className="text-slate-400 mt-1">{user.email}</p>
 
                             <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-sm">
-                                <Shield size={14} className="text-violet-400" />
+                                <Shield size={14} className="text-primary" />
                                 <span className="capitalize text-slate-300">{profile?.role || 'User'}</span>
                             </div>
                         </div>

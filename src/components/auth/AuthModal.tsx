@@ -95,8 +95,8 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Decorative gradient orb */}
-                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-violet-500/30 to-fuchsia-500/30 rounded-full blur-3xl" />
-                    <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-cyan-500/30 to-blue-500/30 rounded-full blur-3xl" />
+                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-full blur-3xl" />
+                    <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-secondary/30 to-primary/30 rounded-full blur-3xl" />
 
                     {/* Header */}
                     <div className="relative px-8 pt-8 pb-4">
@@ -198,7 +198,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                             <button
                                 type="button"
                                 onClick={() => switchMode('reset')}
-                                className="text-sm text-violet-400 hover:text-violet-300 transition-colors"
+                                className="text-sm text-primary hover:brightness-110 transition-colors"
                             >
                                 Forgot password?
                             </button>
@@ -208,7 +208,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full py-3 px-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-semibold rounded-xl shadow-lg shadow-violet-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="w-full py-3 px-4 bg-primary hover:brightness-110 text-white font-semibold rounded-xl shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
                         >
                             {isSubmitting ? (
                                 <Loader2 className="animate-spin" size={20} />
@@ -268,7 +268,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                     <button
                                         type="button"
                                         onClick={() => switchMode('signup')}
-                                        className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                                        className="text-primary hover:brightness-110 font-medium transition-colors"
                                     >
                                         Sign up
                                     </button>
@@ -280,7 +280,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                     <button
                                         type="button"
                                         onClick={() => switchMode('login')}
-                                        className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                                        className="text-primary hover:brightness-110 font-medium transition-colors"
                                     >
                                         Sign in
                                     </button>
@@ -290,7 +290,7 @@ export function AuthModal({ isOpen, onClose }: AuthModalProps) {
                                 <button
                                     type="button"
                                     onClick={() => switchMode('login')}
-                                    className="text-violet-400 hover:text-violet-300 font-medium transition-colors"
+                                    className="text-primary hover:brightness-110 font-medium transition-colors"
                                 >
                                     Back to sign in
                                 </button>

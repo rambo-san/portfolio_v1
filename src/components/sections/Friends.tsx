@@ -81,7 +81,7 @@ export function Friends() {
                                     viewport={{ once: true }}
                                     whileHover={{ y: -5 }}
                                 >
-                                    <div className="h-80 rounded-2xl bg-gradient-to-b from-white/10 to-white/5 border border-white/10 p-6 flex flex-col items-center text-center backdrop-blur-sm hover:border-violet-500/50 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] transition-all duration-300">
+                                    <div className="h-80 rounded-2xl bg-gradient-to-b from-white/10 to-white/5 border border-white/10 p-6 flex flex-col items-center text-center backdrop-blur-sm hover:border-primary/50 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)] transition-all duration-300">
 
                                         {/* Avatar */}
                                         <div className="relative w-24 h-24 mb-4">
@@ -89,17 +89,17 @@ export function Friends() {
                                                 <img
                                                     src={friend.avatarUrl}
                                                     alt={friend.name}
-                                                    className="w-full h-full rounded-full object-cover border-4 border-white/10 group-hover:border-violet-500 transition-colors bg-[#111]"
+                                                    className="w-full h-full rounded-full object-cover border-4 border-white/10 group-hover:border-primary transition-colors bg-[#111]"
                                                 />
                                             ) : (
-                                                <div className="w-full h-full rounded-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-3xl font-bold border-4 border-white/10">
+                                                <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-white/10">
                                                     {friend.name.charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Name & Role */}
-                                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-violet-300 transition-colors">
+                                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">
                                             {friend.name}
                                         </h3>
                                         <p className="text-sm text-slate-400 line-clamp-3 mb-4 flex-1">
@@ -107,7 +107,7 @@ export function Friends() {
                                         </p>
 
                                         {/* View Profile Action */}
-                                        <div className="mt-auto px-4 py-2 rounded-full bg-white/5 text-sm font-medium text-white group-hover:bg-violet-600 transition-colors">
+                                        <div className="mt-auto px-4 py-2 rounded-full bg-white/5 text-sm font-medium text-white group-hover:bg-primary transition-colors">
                                             View Profile
                                         </div>
                                     </div>

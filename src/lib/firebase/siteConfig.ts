@@ -110,8 +110,8 @@ export const defaultConfig: SiteConfig = {
     siteDescription: 'A developer portfolio showcasing systems engineering and interactive web experiences.',
 
     colors: {
-        primary: '#8b5cf6',      // Violet
-        secondary: '#d946ef',    // Fuchsia
+        primary: '#dc2626',      // Red-600 (Your original theme)
+        secondary: '#7f1d1d',    // Red-900 
         background: '#050505',   // Near black
         surface: '#111111',      // Dark gray
         text: '#e5e5e5',         // Light gray

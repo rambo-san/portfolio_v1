@@ -44,7 +44,7 @@ export function UserMenu({ onOpenAuth }: UserMenuProps) {
         return (
             <button
                 onClick={onOpenAuth}
-                className="px-4 py-2 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-500 hover:to-fuchsia-500 text-white font-medium rounded-lg shadow-lg shadow-violet-500/25 transition-all"
+                className="px-4 py-2 bg-primary hover:brightness-110 text-white font-medium rounded-lg shadow-lg shadow-primary/25 transition-all"
             >
                 Sign In
             </button>
@@ -64,7 +64,7 @@ export function UserMenu({ onOpenAuth }: UserMenuProps) {
                         className="w-8 h-8 rounded-full object-cover"
                     />
                 ) : (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm">
                         {(user.displayName || user.email || 'U')[0].toUpperCase()}
                     </div>
                 )}
@@ -92,7 +92,7 @@ export function UserMenu({ onOpenAuth }: UserMenuProps) {
                         </p>
                         <p className="text-gray-400 text-sm truncate">{user.email}</p>
                         {profile && (
-                            <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium rounded-full bg-violet-500/20 text-violet-400 capitalize">
+                            <span className="inline-block mt-2 px-2 py-0.5 text-xs font-medium rounded-full bg-primary/20 text-primary capitalize">
                                 {profile.role}
                             </span>
                         )}
