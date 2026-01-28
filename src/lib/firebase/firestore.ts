@@ -226,7 +226,7 @@ export async function getUserStats(userId: string): Promise<UserStats> {
 
 // ==================== ACHIEVEMENTS ====================
 
-export interface Achievement {
+export interface GameAchievement {
     id: string;
     name: string;
     description: string;
@@ -255,14 +255,14 @@ export async function awardAchievement(
 /**
  * Get user's achievements
  */
-export async function getUserAchievements(userId: string): Promise<Achievement[]> {
+export async function getUserAchievements(userId: string): Promise<GameAchievement[]> {
     const achievementsRef = collection(db, 'users', userId, 'achievements');
     const snapshot = await getDocs(achievementsRef);
 
     return snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-    })) as Achievement[];
+    })) as GameAchievement[];
 }
 
 // ==================== GAME CONFIGURATION ====================
