@@ -4,12 +4,14 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Gamepad2, Home, User, Cpu, Mail } from "lucide-react";
+import { Gamepad2, Home, User, Cpu, Mail, Briefcase, Layout } from "lucide-react";
 import { motion } from "framer-motion";
 
 const navItems = [
     { name: "Home", href: "/", icon: Home, id: "home" },
     { name: "About", href: "/#about", icon: User, id: "about" },
+    // { name: "Services", href: "/#services", icon: Layout, id: "services" },
+    { name: "Exp", href: "/#experience", icon: Briefcase, id: "experience" },
     { name: "Work", href: "/#projects", icon: Cpu, id: "projects" },
     { name: "Arcade", href: "/arcade", icon: Gamepad2, special: true },
     { name: "Contact", href: "/#contact", icon: Mail, id: "contact" },

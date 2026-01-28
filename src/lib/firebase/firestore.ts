@@ -276,6 +276,7 @@ export interface GameConfig {
     congratsImage: string | null;
     thumbnailImage: string | null;
     minScoreForCongrats: number;
+    allowedRoles?: string[]; // RBAC: Roles that can play this game
     createdAt: Date | Timestamp;
     updatedAt: Date | Timestamp;
 }
@@ -330,10 +331,23 @@ export async function saveGameConfig(gameId: string, config: Partial<Omit<GameCo
             congratsImage: config.congratsImage || null,
             thumbnailImage: config.thumbnailImage || null,
             minScoreForCongrats: config.minScoreForCongrats || 10,
+            allowedRoles: config.allowedRoles || ['player', 'admin'],
             createdAt: serverTimestamp(),
             updatedAt: serverTimestamp(),
         });
     }
+}
+
+/**
+ * Get all users from Firestore (admin only)
+ */
+export async function getAllUsers(): Promise<any[]> {
+    const usersRef = collection(db, 'users');
+    const snapshot = await getDocs(usersRef);
+    return snapshot.docs.map(doc => ({
+        uid: doc.id,
+        ...doc.data()
+    }));
 }
 
 /**

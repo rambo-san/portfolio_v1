@@ -30,8 +30,8 @@ export function Friends() {
     }
 
     return (
-        <section className="py-24 px-4 relative overflow-hidden">
-            <div className="container mx-auto max-w-7xl">
+        <section className="py-24 relative overflow-hidden">
+            <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>

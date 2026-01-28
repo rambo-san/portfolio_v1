@@ -2,27 +2,35 @@
 
 import { Hero } from "@/components/sections/Hero";
 import { About } from "@/components/sections/About";
+import { ExperienceSection } from "@/components/sections/Experience";
+import { ServicesSection } from "@/components/sections/Services";
+import { AcademicSection } from "@/components/sections/Academic";
+import { AchievementsSection } from "@/components/sections/Achievements";
 import { Projects } from "@/components/sections/Projects";
+import { Friends } from "@/components/sections/Friends";
 import { Mail, Linkedin, Github, Instagram } from "lucide-react";
 import Link from "next/link";
 import { useSiteConfig } from "@/context/SiteConfigContext";
 
 export default function Home() {
   const { config } = useSiteConfig();
-  const { socialLinks, contact } = config;
+  const { socialLinks, contact, layout } = config;
 
-  return (
-    <div className="flex flex-col gap-0">
-      <Hero />
-      <About />
-      <Projects />
-
-
-      {/* Simple Contact Section */}
-      <section id="contact" className="py-32 px-4 text-center relative overflow-hidden">
+  // Map section IDs to components
+  const sectionMap: Record<string, React.ReactNode> = {
+    hero: <Hero key="hero" />,
+    about: <About key="about" />,
+    experience: <ExperienceSection key="experience" config={config.experience} />,
+    services: <ServicesSection key="services" config={config.services} />,
+    academic: <AcademicSection key="academic" config={config.academic} />,
+    achievements: <AchievementsSection key="achievements" config={config.achievements} />,
+    projects: <Projects key="projects" />,
+    friends: <Friends key="friends" />,
+    contact: (
+      <section id="contact" key="contact" className="py-32 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent pointer-events-none" />
 
-        <div className="container mx-auto relative z-10">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10 text-center">
           <h2 className="text-4xl font-bold mb-12">{contact.title}</h2>
           <div className="flex flex-wrap justify-center gap-12">
             {socialLinks.email && (
@@ -60,6 +68,17 @@ export default function Home() {
           </div>
         </div>
       </section>
+    ),
+  };
+
+  // Get ordered sections from config and filter hidden ones
+  const hiddenSections = layout?.hiddenSections || [];
+  const sectionOrder = (layout?.sectionOrder || ['hero', 'about', 'experience', 'academic', 'achievements', 'projects', 'contact'])
+    .filter(id => !hiddenSections.includes(id));
+
+  return (
+    <div className="flex flex-col gap-0">
+      {sectionOrder.map(sectionId => sectionMap[sectionId])}
     </div>
   );
 }

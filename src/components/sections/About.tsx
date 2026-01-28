@@ -9,8 +9,8 @@ export function About() {
     const { about } = config;
 
     return (
-        <section id="about" className="py-24 px-4 relative">
-            <div className="container mx-auto max-w-5xl">
+        <section id="about" className="py-24 relative overflow-hidden">
+            <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}

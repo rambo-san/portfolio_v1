@@ -8,12 +8,13 @@ import { X, Mail, Lock, User, Loader2, Eye, EyeOff, AlertCircle } from 'lucide-r
 interface AuthModalProps {
     isOpen: boolean;
     onClose: () => void;
+    initialMode?: AuthMode;
 }
 
 type AuthMode = 'login' | 'signup' | 'reset';
 
-export function AuthModal({ isOpen, onClose }: AuthModalProps) {
-    const [mode, setMode] = useState<AuthMode>('login');
+export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalProps) {
+    const [mode, setMode] = useState<AuthMode>(initialMode);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [displayName, setDisplayName] = useState('');

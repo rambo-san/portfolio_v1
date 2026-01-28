@@ -28,6 +28,51 @@ export interface Project {
     featured: boolean;
 }
 
+export interface Education {
+    id?: string;
+    institution: string;
+    degree: string;
+    startDate: string;
+    endDate?: string;
+    isCurrent?: boolean;
+    score?: string; // e.g., "CGPA: 9.5" or "92%"
+    description?: string;
+    link?: string;
+    order: number;
+}
+
+export interface Experience {
+    id?: string;
+    company: string;
+    role: string;
+    startDate: string;
+    endDate?: string;
+    isCurrent?: boolean;
+    description: string;
+    link?: string;
+    technologies?: string[];
+    order: number;
+}
+
+export interface Achievement {
+    id?: string;
+    title: string;
+    issuer: string;
+    date: string;
+    description?: string;
+    link?: string;
+    imageUrl?: string;
+    order: number;
+}
+
+export interface Service {
+    id?: string;
+    title: string;
+    description: string;
+    icon: string; // Lucide icon name
+    order: number;
+}
+
 export interface SiteConfig {
     // Branding
     siteName: string;
@@ -65,6 +110,30 @@ export interface SiteConfig {
         imageUrl?: string;
     };
 
+    // Experience Section
+    experience: {
+        title: string;
+        subtitle: string;
+    };
+
+    // Academic Section
+    academic: {
+        title: string;
+        subtitle: string;
+    };
+
+    // Achievements Section
+    achievements: {
+        title: string;
+        subtitle: string;
+    };
+
+    // Services Section
+    services: {
+        title: string;
+        subtitle: string;
+    };
+
     // Projects Section
     projects: {
         title: string;
@@ -97,6 +166,12 @@ export interface SiteConfig {
         saveGuestScoresLocally: boolean; // Save guest scores to localStorage
         showLeaderboard: boolean;        // Show global leaderboard
         requireLoginForLeaderboard: boolean; // Require login to appear on leaderboard
+    };
+
+    // Layout Settings
+    layout: {
+        sectionOrder: string[];
+        hiddenSections: string[];
     };
 
     // Metadata
@@ -136,6 +211,26 @@ export const defaultConfig: SiteConfig = {
         skillsLabel: 'Core Competencies',
     },
 
+    experience: {
+        title: 'Work Experience',
+        subtitle: 'My professional journey in the tech industry.',
+    },
+
+    academic: {
+        title: 'Education',
+        subtitle: 'My academic background and qualifications.',
+    },
+
+    achievements: {
+        title: 'Certifications & Honors',
+        subtitle: 'Recognition of my technical expertise and contributions.',
+    },
+
+    services: {
+        title: 'Services & Expertise',
+        subtitle: 'High-impact solutions tailored to your business needs.',
+    },
+
     projects: {
         title: 'Featured Projects',
         subtitle: 'A selection of complex systems where I faced interesting architectural challenges.',
@@ -161,6 +256,11 @@ export const defaultConfig: SiteConfig = {
         saveGuestScoresLocally: true,
         showLeaderboard: true,
         requireLoginForLeaderboard: true,
+    },
+
+    layout: {
+        sectionOrder: ['hero', 'about', 'experience', 'services', 'academic', 'achievements', 'projects', 'friends', 'contact'],
+        hiddenSections: ['services'], // Services hidden by default as requested earlier
     },
 };
 
@@ -304,6 +404,282 @@ export async function updateProject(id: string, updates: Partial<Project>): Prom
 export async function deleteProject(id: string): Promise<void> {
     const projectRef = doc(db, PROJECTS_COLLECTION, id);
     await deleteDoc(projectRef);
+}
+
+// ==================== EXPERIENCE CRUD ====================
+
+const EXPERIENCE_COLLECTION = 'experience';
+
+/**
+ * Get all experience entries
+ */
+export async function getExperience(): Promise<Experience[]> {
+    try {
+        const expRef = collection(db, EXPERIENCE_COLLECTION);
+        const q = query(expRef, orderBy('order', 'asc'));
+        const snapshot = await getDocs(q);
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Experience));
+    } catch (error) {
+        console.error('Error fetching experience:', error);
+        return [];
+    }
+}
+
+/**
+ * Subscribe to experience (real-time)
+ */
+export function subscribeExperience(
+    callback: (experience: Experience[]) => void
+): () => void {
+    const expRef = collection(db, EXPERIENCE_COLLECTION);
+    const q = query(expRef, orderBy('order', 'asc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const experience = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Experience));
+        callback(experience);
+    }, (error) => {
+        console.error('Error subscribing to experience:', error);
+        callback([]);
+    });
+}
+
+/**
+ * Add a new experience entry
+ */
+export async function addExperience(experience: Omit<Experience, 'id'>): Promise<string> {
+    const expRef = collection(db, EXPERIENCE_COLLECTION);
+    const docRef = await addDoc(expRef, experience);
+    return docRef.id;
+}
+
+/**
+ * Update an experience entry
+ */
+export async function updateExperience(id: string, updates: Partial<Experience>): Promise<void> {
+    const expRef = doc(db, EXPERIENCE_COLLECTION, id);
+    await updateDoc(expRef, updates);
+}
+
+/**
+ * Delete an experience entry
+ */
+export async function deleteExperience(id: string): Promise<void> {
+    const expRef = doc(db, EXPERIENCE_COLLECTION, id);
+    await deleteDoc(expRef);
+}
+
+// ==================== EDUCATION CRUD ====================
+
+const EDUCATION_COLLECTION = 'education';
+
+/**
+ * Get all education entries
+ */
+export async function getEducation(): Promise<Education[]> {
+    try {
+        const eduRef = collection(db, EDUCATION_COLLECTION);
+        const q = query(eduRef, orderBy('order', 'asc'));
+        const snapshot = await getDocs(q);
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Education));
+    } catch (error) {
+        console.error('Error fetching education:', error);
+        return [];
+    }
+}
+
+/**
+ * Subscribe to education (real-time)
+ */
+export function subscribeEducation(
+    callback: (education: Education[]) => void
+): () => void {
+    const eduRef = collection(db, EDUCATION_COLLECTION);
+    const q = query(eduRef, orderBy('order', 'asc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const education = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Education));
+        callback(education);
+    }, (error) => {
+        console.error('Error subscribing to education:', error);
+        callback([]);
+    });
+}
+
+/**
+ * Add a new education entry
+ */
+export async function addEducation(education: Omit<Education, 'id'>): Promise<string> {
+    const eduRef = collection(db, EDUCATION_COLLECTION);
+    const docRef = await addDoc(eduRef, education);
+    return docRef.id;
+}
+
+/**
+ * Update an education entry
+ */
+export async function updateEducation(id: string, updates: Partial<Education>): Promise<void> {
+    const eduRef = doc(db, EDUCATION_COLLECTION, id);
+    await updateDoc(eduRef, updates);
+}
+
+/**
+ * Delete an education entry
+ */
+export async function deleteEducation(id: string): Promise<void> {
+    const eduRef = doc(db, EDUCATION_COLLECTION, id);
+    await deleteDoc(eduRef);
+}
+
+// ==================== ACHIEVEMENTS CRUD ====================
+
+const ACHIEVEMENTS_COLLECTION = 'achievements';
+
+/**
+ * Get all achievements
+ */
+export async function getAchievements(): Promise<Achievement[]> {
+    try {
+        const achRef = collection(db, ACHIEVEMENTS_COLLECTION);
+        const q = query(achRef, orderBy('order', 'asc'));
+        const snapshot = await getDocs(q);
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Achievement));
+    } catch (error) {
+        console.error('Error fetching achievements:', error);
+        return [];
+    }
+}
+
+/**
+ * Subscribe to achievements (real-time)
+ */
+export function subscribeAchievements(
+    callback: (achievements: Achievement[]) => void
+): () => void {
+    const achRef = collection(db, ACHIEVEMENTS_COLLECTION);
+    const q = query(achRef, orderBy('order', 'asc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const achievements = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Achievement));
+        callback(achievements);
+    }, (error) => {
+        console.error('Error subscribing to achievements:', error);
+        callback([]);
+    });
+}
+
+/**
+ * Add a new achievement
+ */
+export async function addAchievement(achievement: Omit<Achievement, 'id'>): Promise<string> {
+    const achRef = collection(db, ACHIEVEMENTS_COLLECTION);
+    const docRef = await addDoc(achRef, achievement);
+    return docRef.id;
+}
+
+/**
+ * Update an achievement
+ */
+export async function updateAchievement(id: string, updates: Partial<Achievement>): Promise<void> {
+    const achRef = doc(db, ACHIEVEMENTS_COLLECTION, id);
+    await updateDoc(achRef, updates);
+}
+
+/**
+ * Delete an achievement
+ */
+export async function deleteAchievement(id: string): Promise<void> {
+    const achRef = doc(db, ACHIEVEMENTS_COLLECTION, id);
+    await deleteDoc(achRef);
+}
+
+// ==================== SERVICES CRUD ====================
+
+const SERVICES_COLLECTION = 'services';
+
+/**
+ * Get all services
+ */
+export async function getServices(): Promise<Service[]> {
+    try {
+        const servRef = collection(db, SERVICES_COLLECTION);
+        const q = query(servRef, orderBy('order', 'asc'));
+        const snapshot = await getDocs(q);
+
+        return snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Service));
+    } catch (error) {
+        console.error('Error fetching services:', error);
+        return [];
+    }
+}
+
+/**
+ * Subscribe to services (real-time)
+ */
+export function subscribeServices(
+    callback: (services: Service[]) => void
+): () => void {
+    const servRef = collection(db, SERVICES_COLLECTION);
+    const q = query(servRef, orderBy('order', 'asc'));
+
+    return onSnapshot(q, (snapshot) => {
+        const services = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        } as Service));
+        callback(services);
+    }, (error) => {
+        console.error('Error subscribing to services:', error);
+        callback([]);
+    });
+}
+
+/**
+ * Add a new service
+ */
+export async function addService(service: Omit<Service, 'id'>): Promise<string> {
+    const servRef = collection(db, SERVICES_COLLECTION);
+    const docRef = await addDoc(servRef, service);
+    return docRef.id;
+}
+
+/**
+ * Update a service
+ */
+export async function updateService(id: string, updates: Partial<Service>): Promise<void> {
+    const servRef = doc(db, SERVICES_COLLECTION, id);
+    await updateDoc(servRef, updates);
+}
+
+/**
+ * Delete a service
+ */
+export async function deleteService(id: string): Promise<void> {
+    const servRef = doc(db, SERVICES_COLLECTION, id);
+    await deleteDoc(servRef);
 }
 
 // ==================== FRIENDS CRUD ====================

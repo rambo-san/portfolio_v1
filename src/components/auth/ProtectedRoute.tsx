@@ -61,9 +61,13 @@ export function ProtectedRoute({
 
     // Check role-based access
     const roleHierarchy: Record<UserRole, number> = {
-        admin: 3,
+        admin: 10,
+        vip: 5,
+        beta_tester: 4,
+        friend: 3,
         player: 2,
-        guest: 1,
+        user: 1,
+        guest: 0,
     };
 
     const userRoleLevel = profile ? roleHierarchy[profile.role] : 0;

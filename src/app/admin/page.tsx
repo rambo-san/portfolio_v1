@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Reorder, useDragControls } from 'framer-motion';
 import { useAuth } from '@/context/AuthContext';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import {
@@ -19,7 +19,29 @@ import {
     addFriend,
     updateFriend,
     deleteFriend,
+    Experience,
+    getExperience,
+    addExperience,
+    updateExperience,
+    deleteExperience,
+    Education,
+    getEducation,
+    addEducation,
+    updateEducation,
+    deleteEducation,
+    Achievement,
+    getAchievements,
+    addAchievement,
+    updateAchievement,
+    deleteAchievement,
+    Service,
+    getServices,
+    addService,
+    updateService,
+    deleteService,
 } from '@/lib/firebase/siteConfig';
+import { getAllUsers } from '@/lib/firebase/firestore';
+import { updateUserRole, UserRole } from '@/lib/firebase/auth';
 import { Button } from '@/components/ui/button';
 import {
     Settings,
@@ -39,11 +61,20 @@ import {
     X,
     Users,
     Upload,
+    Briefcase,
+    GraduationCap,
+    Trophy,
+    Layout,
+    GripVertical,
+    MoveUp,
+    MoveDown,
+    EyeOff,
 } from 'lucide-react';
 import { uploadImage } from '@/lib/firebase/storage';
 import { Skeleton } from '@/components/ui/skeleton';
+import { formatDate, formatDuration } from '@/lib/utils';
 
-type TabType = 'general' | 'colors' | 'content' | 'projects' | 'friends' | 'games' | 'social';
+type TabType = 'general' | 'colors' | 'layout' | 'content' | 'projects' | 'experience' | 'academic' | 'achievements' | 'services' | 'friends' | 'games' | 'social' | 'users';
 
 export default function AdminDashboard() {
     return (
@@ -144,150 +175,194 @@ function AdminContent() {
         }
     };
 
-    // Reset to defaults
-    const handleReset = () => {
-        setConfig(defaultConfig);
-        setHasChanges(true);
-    };
 
     const tabs = [
         { id: 'general', label: 'General', icon: Settings },
         { id: 'colors', label: 'Colors', icon: Palette },
+        { id: 'layout', label: 'Layout', icon: Layout },
         { id: 'content', label: 'Content', icon: Type },
+        { id: 'experience', label: 'Experience', icon: Briefcase },
+        { id: 'academic', label: 'Academic', icon: GraduationCap },
+        { id: 'achievements', label: 'Achievements', icon: Trophy },
+        { id: 'services', label: 'Services', icon: Layout },
         { id: 'projects', label: 'Projects', icon: FolderKanban },
         { id: 'friends', label: 'Friends', icon: Users },
         { id: 'games', label: 'Arcade', icon: Gamepad2 },
         { id: 'social', label: 'Social', icon: LinkIcon },
+        { id: 'users', label: 'Users', icon: Users },
     ] as const;
 
 
     return (
-        <div className="min-h-screen py-8 px-4">
-            <div className="max-w-6xl mx-auto">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                    <div>
-                        <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-                        <p className="text-gray-400 mt-1">
-                            Configure your portfolio settings
-                        </p>
+        <div className="flex flex-col h-[100dvh] bg-background overflow-hidden lg:overflow-visible lg:h-auto">
+            {/* Sticky Header Section */}
+            <div className="sticky top-0 z-50 bg-gray-950/80 backdrop-blur-xl border-b border-gray-800">
+                <div className="max-w-6xl mx-auto pt-6 pb-0 sm:pb-4 px-4 sm:px-6">
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                        <div>
+                            <h1 className="text-xl md:text-3xl font-bold text-white tracking-tight">Admin Dashboard</h1>
+                            <p className="text-gray-400 mt-0.5 text-[10px] md:text-sm uppercase tracking-widest font-medium opacity-70">
+                                Portfolio Configuration
+                            </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <a
+                                href="/"
+                                target="_blank"
+                                className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-gray-700/50 rounded-xl text-gray-300 hover:text-white transition-all whitespace-nowrap text-sm"
+                            >
+                                <Eye size={16} />
+                                Preview
+                            </a>
+
+                            <button
+                                onClick={handleSave}
+                                disabled={!hasChanges || isSaving}
+                                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-bold transition-all whitespace-nowrap text-sm ${saveSuccess
+                                    ? 'bg-green-600 text-white'
+                                    : hasChanges
+                                        ? 'bg-primary hover:brightness-110 text-white shadow-lg shadow-primary/40'
+                                        : 'bg-gray-800 text-gray-500 cursor-not-allowed border border-gray-700/30'
+                                    }`}
+                            >
+                                {isSaving ? (
+                                    <Loader2 size={16} className="animate-spin" />
+                                ) : saveSuccess ? (
+                                    <Check size={16} />
+                                ) : (
+                                    <Save size={16} />
+                                )}
+                                {saveSuccess ? 'Saved!' : 'Save Changes'}
+                            </button>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleReset}
-                            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition-all"
-                        >
-                            <RefreshCw size={18} />
-                            Reset
-                        </button>
-
-                        <a
-                            href="/"
-                            target="_blank"
-                            className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-gray-700 rounded-lg text-gray-300 hover:text-white transition-all"
-                        >
-                            <Eye size={18} />
-                            Preview
-                        </a>
-
-                        <button
-                            onClick={handleSave}
-                            disabled={!hasChanges || isSaving}
-                            className={`flex items-center gap-2 px-6 py-2 rounded-lg font-medium transition-all ${saveSuccess
-                                ? 'bg-green-600 text-white'
-                                : hasChanges
-                                    ? 'bg-primary hover:brightness-110 text-white shadow-lg shadow-primary/25'
-                                    : 'bg-gray-700 text-gray-400 cursor-not-allowed'
-                                }`}
-                        >
-                            {isSaving ? (
-                                <Loader2 size={18} className="animate-spin" />
-                            ) : saveSuccess ? (
-                                <Check size={18} />
-                            ) : (
-                                <Save size={18} />
-                            )}
-                            {saveSuccess ? 'Saved!' : 'Save Changes'}
-                        </button>
-                    </div>
-                </div>
-
-                {/* Tabs and Content */}
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                    {/* Sidebar Tabs */}
-                    <div className="lg:col-span-1">
-                        <nav className="bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-2 space-y-1">
+                    {/* Navigation Tabs - Mobile Scroller */}
+                    <div className="lg:hidden -mx-4 sm:-mx-6 overflow-hidden">
+                        <nav className="flex items-center gap-2 overflow-x-auto no-scrollbar px-4 sm:px-6 pb-4">
                             {tabs.map((tab) => (
                                 <button
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
-                                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id
-                                        ? 'bg-primary/20 text-primary border border-primary/30'
-                                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                    className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all whitespace-nowrap border ${activeTab === tab.id
+                                        ? 'bg-primary text-white border-primary shadow-lg shadow-primary/20'
+                                        : 'bg-white/5 text-gray-400 border-gray-700/50 hover:text-white hover:bg-white/10'
                                         }`}
                                 >
-                                    <tab.icon size={18} />
+                                    <tab.icon size={14} className="shrink-0" />
                                     {tab.label}
                                 </button>
                             ))}
                         </nav>
                     </div>
+                </div>
+            </div>
 
-                    {/* Content Area */}
-                    <div className="lg:col-span-3">
-                        <motion.div
-                            key={activeTab}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6"
-                        >
-                            {isLoading ? (
-                                <TabSkeleton />
-                            ) : (
-                                <>
-                                    {activeTab === 'general' && (
-                                        <GeneralTab config={config} updateConfig={updateConfig} />
-                                    )}
-                                    {activeTab === 'colors' && (
-                                        <ColorsTab
-                                            colors={config.colors}
-                                            updateColors={(colors) => updateNestedConfig('colors', colors)}
-                                        />
-                                    )}
-                                    {activeTab === 'content' && (
-                                        <ContentTab
-                                            config={config}
-                                            updateHero={(hero) => updateNestedConfig('hero', hero)}
-                                            updateAbout={(about) => updateNestedConfig('about', about)}
-                                            updateProjects={(projects) => updateNestedConfig('projects', projects)}
-                                            updateFriends={(friends) => updateNestedConfig('friends', friends)}
-                                            updateContact={(contact) => updateNestedConfig('contact', contact)}
-                                        />
-                                    )}
-                                    {activeTab === 'projects' && (
-                                        <ProjectsTab />
-                                    )}
-                                    {activeTab === 'friends' && (
-                                        <FriendsTab />
-                                    )}
-                                    {activeTab === 'games' && (
-                                        <GamesTab
-                                            settings={config.gameSettings}
-                                            updateSettings={(settings) =>
-                                                updateNestedConfig('gameSettings', settings)
-                                            }
-                                        />
-                                    )}
-                                    {activeTab === 'social' && (
-                                        <SocialTab
-                                            links={config.socialLinks}
-                                            updateLinks={(links) => updateNestedConfig('socialLinks', links)}
-                                        />
-                                    )}
-                                </>
-                            )}
-                        </motion.div>
+            {/* Main Content Area */}
+            <div className="flex-1 overflow-y-auto no-scrollbar lg:overflow-visible">
+                <div className="max-w-6xl mx-auto px-4 py-6">
+                    <div className="flex flex-col lg:grid lg:grid-cols-4 gap-8">
+                        {/* Desktop Sidebar Tabs */}
+                        <div className="hidden lg:block lg:col-span-1">
+                            <nav className="bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 flex flex-col gap-1 sticky top-6">
+                                {tabs.map((tab) => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all whitespace-nowrap w-full text-left ${activeTab === tab.id
+                                            ? 'bg-primary text-white border border-primary/50 shadow-md shadow-primary/20'
+                                            : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
+                                            }`}
+                                    >
+                                        <tab.icon size={18} className="shrink-0" />
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </nav>
+                        </div>
+
+                        {/* Content Area */}
+                        <div className="lg:col-span-3">
+                            <motion.div
+                                key={activeTab}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="bg-gray-900/50 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-6 md:p-8"
+                            >
+                                {isLoading ? (
+                                    <TabSkeleton />
+                                ) : (
+                                    <>
+                                        {activeTab === 'general' && (
+                                            <GeneralTab config={config} updateConfig={updateConfig} />
+                                        )}
+                                        {activeTab === 'colors' && (
+                                            <ColorsTab
+                                                colors={config.colors}
+                                                updateColors={(colors) => updateNestedConfig('colors', colors)}
+                                            />
+                                        )}
+                                        {activeTab === 'layout' && (
+                                            <LayoutTab
+                                                layout={config.layout}
+                                                updateLayout={(layout) => updateNestedConfig('layout', layout)}
+                                            />
+                                        )}
+                                        {activeTab === 'content' && (
+                                            <ContentTab
+                                                config={config}
+                                                updateHero={(hero) => updateNestedConfig('hero', hero)}
+                                                updateAbout={(about) => updateNestedConfig('about', about)}
+                                                updateProjects={(projects) => updateNestedConfig('projects', projects)}
+                                                updateFriends={(friends) => updateNestedConfig('friends', friends)}
+                                                updateExperience={(experience) => updateNestedConfig('experience', experience)}
+                                                updateAcademic={(academic) => updateNestedConfig('academic', academic)}
+                                                updateAchievements={(achievements) => updateNestedConfig('achievements', achievements)}
+                                                updateServices={(services) => updateNestedConfig('services', services)}
+                                                updateContact={(contact) => updateNestedConfig('contact', contact)}
+                                            />
+                                        )}
+                                        {activeTab === 'projects' && (
+                                            <ProjectsTab />
+                                        )}
+                                        {activeTab === 'users' && (
+                                            <UsersTab />
+                                        )}
+                                        {activeTab === 'experience' && (
+                                            <ExperienceTab />
+                                        )}
+                                        {activeTab === 'academic' && (
+                                            <AcademicTab />
+                                        )}
+                                        {activeTab === 'achievements' && (
+                                            <AchievementsTab />
+                                        )}
+                                        {activeTab === 'services' && (
+                                            <ServicesTab />
+                                        )}
+                                        {activeTab === 'friends' && (
+                                            <FriendsTab />
+                                        )}
+                                        {activeTab === 'games' && (
+                                            <GamesTab
+                                                settings={config.gameSettings}
+                                                updateSettings={(settings) =>
+                                                    updateNestedConfig('gameSettings', settings)
+                                                }
+                                            />
+                                        )}
+                                        {activeTab === 'social' && (
+                                            <SocialTab
+                                                links={config.socialLinks}
+                                                updateLinks={(links) => updateNestedConfig('socialLinks', links)}
+                                            />
+                                        )}
+                                    </>
+                                )}
+                            </motion.div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -515,6 +590,10 @@ function ContentTab({
     updateAbout,
     updateProjects,
     updateFriends,
+    updateExperience,
+    updateAcademic,
+    updateAchievements,
+    updateServices,
     updateContact,
 }: {
     config: SiteConfig;
@@ -522,6 +601,10 @@ function ContentTab({
     updateAbout: (about: Partial<SiteConfig['about']>) => void;
     updateProjects: (projects: Partial<SiteConfig['projects']>) => void;
     updateFriends: (friends: Partial<SiteConfig['friends']>) => void;
+    updateExperience: (experience: Partial<SiteConfig['experience']>) => void;
+    updateAcademic: (academic: Partial<SiteConfig['academic']>) => void;
+    updateAchievements: (achievements: Partial<SiteConfig['achievements']>) => void;
+    updateServices: (services: Partial<SiteConfig['services']>) => void;
     updateContact: (contact: Partial<SiteConfig['contact']>) => void;
 }) {
     const [newSkill, setNewSkill] = useState('');
@@ -718,6 +801,122 @@ function ContentTab({
                                 Add
                             </button>
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Experience Section Header */}
+            <div>
+                <h2 className="text-xl font-bold text-white mb-4">Experience Section</h2>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Section Title
+                        </label>
+                        <input
+                            type="text"
+                            value={config.experience?.title || 'Work Experience'}
+                            onChange={(e) => updateExperience({ title: e.target.value })}
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Section Subtitle
+                        </label>
+                        <textarea
+                            value={config.experience?.subtitle || ''}
+                            onChange={(e) => updateExperience({ subtitle: e.target.value })}
+                            rows={2}
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Academic Section Header */}
+            <div>
+                <h2 className="text-xl font-bold text-white mb-4">Academic Section</h2>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Section Title
+                        </label>
+                        <input
+                            type="text"
+                            value={config.academic?.title || 'Education'}
+                            onChange={(e) => updateAcademic({ title: e.target.value })}
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Section Subtitle
+                        </label>
+                        <textarea
+                            value={config.academic?.subtitle || ''}
+                            onChange={(e) => updateAcademic({ subtitle: e.target.value })}
+                            rows={2}
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Achievements Section Header */}
+            <div>
+                <h2 className="text-xl font-bold text-white mb-4">Achievements Section</h2>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Section Title
+                        </label>
+                        <input
+                            type="text"
+                            value={config.achievements?.title || 'Certifications & Honors'}
+                            onChange={(e) => updateAchievements({ title: e.target.value })}
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Section Subtitle
+                        </label>
+                        <textarea
+                            value={config.achievements?.subtitle || ''}
+                            onChange={(e) => updateAchievements({ subtitle: e.target.value })}
+                            rows={2}
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            {/* Services Section Header */}
+            <div>
+                <h2 className="text-xl font-bold text-white mb-4">Services Section</h2>
+                <div className="space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Section Title
+                        </label>
+                        <input
+                            type="text"
+                            value={config.services?.title || 'Services & Expertise'}
+                            onChange={(e) => updateServices({ title: e.target.value })}
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Section Subtitle
+                        </label>
+                        <textarea
+                            value={config.services?.subtitle || ''}
+                            onChange={(e) => updateServices({ subtitle: e.target.value })}
+                            rows={2}
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                        />
                     </div>
                 </div>
             </div>
@@ -962,7 +1161,7 @@ function ProjectForm({
                 </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm text-gray-300 mb-1">Title</label>
                     <input
@@ -1249,7 +1448,7 @@ function FriendForm({
                 </button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm text-gray-300 mb-1">Name</label>
                     <input
@@ -1282,7 +1481,7 @@ function FriendForm({
                 />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <label className="block text-sm text-gray-300 mb-1">Avatar URL</label>
                     <div className="flex gap-2">
@@ -1329,7 +1528,7 @@ function FriendForm({
 
             <div>
                 <label className="block text-sm text-gray-300 mb-2">Social Links</label>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <input
                         type="url"
                         value={formData.socialLinks.github || ''}
@@ -1688,14 +1887,48 @@ function GamesTab({
                                             </div>
 
                                             {/* Settings */}
-                                            <div className="flex items-center gap-4 p-3 bg-black/20 rounded-lg">
+                                            <div className="flex flex-col sm:flex-row sm:items-center gap-4 p-3 bg-black/20 rounded-lg">
                                                 <label className="text-sm text-gray-300">Min Score for Congrats:</label>
                                                 <input
                                                     type="number"
                                                     value={gameConfigs[game.id]?.minScoreForCongrats || 10}
                                                     onChange={(e) => handleSaveGameConfig(game.id, { minScoreForCongrats: parseInt(e.target.value) || 10 })}
-                                                    className="w-24 px-3 py-2 bg-black/40 border border-gray-600 rounded-lg text-white"
+                                                    className="w-full sm:w-24 px-3 py-2 bg-black/40 border border-gray-600 rounded-lg text-white"
                                                 />
+                                            </div>
+
+                                            {/* Allowed Roles */}
+                                            <div className="p-3 bg-black/20 rounded-lg">
+                                                <label className="text-xs text-gray-400 uppercase tracking-wider block mb-2">Allowed Roles (RBAC)</label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {['admin', 'player', 'user', 'guest', 'vip', 'beta_tester', 'friend'].map((role) => {
+                                                        const isAllowed = gameConfigs[game.id]?.allowedRoles?.includes(role) ||
+                                                            (role === 'admin') || // admin always allowed
+                                                            (!gameConfigs[game.id]?.allowedRoles && (role === 'player' || role === 'admin')); // default
+
+                                                        return (
+                                                            <button
+                                                                key={role}
+                                                                onClick={() => {
+                                                                    const currentRoles = gameConfigs[game.id]?.allowedRoles || ['player', 'admin'];
+                                                                    const newRoles = isAllowed
+                                                                        ? currentRoles.filter((r: string) => r !== role)
+                                                                        : [...currentRoles, role];
+                                                                    handleSaveGameConfig(game.id, { allowedRoles: Array.from(new Set(newRoles)) });
+                                                                }}
+                                                                className={`px-3 py-1 rounded-full text-xs font-medium transition-all border ${isAllowed
+                                                                    ? 'bg-primary/20 border-primary text-primary'
+                                                                    : 'bg-white/5 border-gray-700 text-gray-400 hover:text-white'
+                                                                    }`}
+                                                            >
+                                                                {role}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <p className="text-[10px] text-gray-500 mt-2 italic">
+                                                    * Admin always has access. Players and guests have access by default unless restricted.
+                                                </p>
                                             </div>
 
                                             {/* Danger Zone */}
@@ -1836,6 +2069,1285 @@ function ToggleSetting({
                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 />
             </button>
+        </div>
+    );
+}
+
+// ==================== EXPERIENCE TAB ====================
+
+function ExperienceTab() {
+    const [experience, setExperience] = useState<Experience[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [editingExp, setEditingExp] = useState<Experience | null>(null);
+    const [isAdding, setIsAdding] = useState(false);
+
+    useEffect(() => {
+        loadExperience();
+    }, []);
+
+    const loadExperience = async () => {
+        setLoading(true);
+        const data = await getExperience();
+        setExperience(data);
+        setLoading(false);
+    };
+
+    const handleAddExperience = async (exp: Omit<Experience, 'id'>) => {
+        await addExperience(exp);
+        loadExperience();
+        setIsAdding(false);
+    };
+
+    const handleUpdateExperience = async (id: string, updates: Partial<Experience>) => {
+        await updateExperience(id, updates);
+        loadExperience();
+        setEditingExp(null);
+    };
+
+    const handleDeleteExperience = async (id: string) => {
+        if (confirm('Are you sure you want to delete this experience entry?')) {
+            await deleteExperience(id);
+            loadExperience();
+        }
+    };
+
+    if (isAdding || editingExp) {
+        return (
+            <ExperienceForm
+                experience={editingExp || undefined}
+                onSubmit={(data) => {
+                    if (editingExp?.id) {
+                        handleUpdateExperience(editingExp.id, data);
+                    } else {
+                        handleAddExperience(data);
+                    }
+                }}
+                onCancel={() => {
+                    setIsAdding(false);
+                    setEditingExp(null);
+                }}
+            />
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">Manage Experience</h2>
+                <button
+                    onClick={() => setIsAdding(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-lg transition-colors"
+                >
+                    <Plus size={18} />
+                    Add Experience
+                </button>
+            </div>
+
+            {loading ? (
+                <SkeletonList />
+            ) : experience.length === 0 ? (
+                <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-gray-700">
+                    <Briefcase size={48} className="mx-auto text-gray-600 mb-4" />
+                    <p className="text-gray-400">No experience entries found. Add your first one!</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {experience.map((exp) => (
+                        <div
+                            key={exp.id}
+                            className="p-4 bg-white/5 rounded-xl border border-gray-700/50 flex items-center justify-between group"
+                        >
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-white">{exp.role}</h3>
+                                <p className="text-primary text-sm font-medium">{exp.company}</p>
+                                <p className="text-gray-400 text-sm mt-1">
+                                    {formatDate(exp.startDate)} — {exp.isCurrent ? 'Present' : (exp.endDate ? formatDate(exp.endDate) : 'Present')} {formatDuration(exp.startDate, exp.endDate, exp.isCurrent)}
+                                </p>
+                            </div>
+                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => setEditingExp(exp)}
+                                    className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <Edit3 size={18} />
+                                </button>
+                                <button
+                                    onClick={() => exp.id && handleDeleteExperience(exp.id)}
+                                    className="p-2 bg-white/5 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function ExperienceForm({
+    experience,
+    onSubmit,
+    onCancel,
+}: {
+    experience?: Experience;
+    onSubmit: (experience: Omit<Experience, 'id'>) => void;
+    onCancel: () => void;
+}) {
+    const [formData, setFormData] = useState<Omit<Experience, 'id'>>({
+        company: experience?.company || '',
+        role: experience?.role || '',
+        startDate: experience?.startDate || '',
+        endDate: experience?.endDate || '',
+        isCurrent: experience?.isCurrent || false,
+        description: experience?.description || '',
+        link: experience?.link || '',
+        technologies: experience?.technologies || [],
+        order: experience?.order || 0,
+    });
+
+    const [newTech, setNewTech] = useState('');
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(formData);
+    };
+
+    const addTech = () => {
+        if (newTech.trim()) {
+            setFormData({ ...formData, technologies: [...(formData.technologies || []), newTech.trim()] });
+            setNewTech('');
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-xl font-bold text-white">
+                {experience ? 'Edit Experience' : 'Add Experience'}
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Company Name</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.company}
+                        onChange={(e) => setFormData({ ...formData, company: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Role/Title</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.role}
+                        onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Start Month/Year</label>
+                    <input
+                        type="month"
+                        required
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-300">End Month/Year</label>
+                        <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.isCurrent}
+                                onChange={(e) => setFormData({ ...formData, isCurrent: e.target.checked })}
+                                className="rounded border-gray-700 bg-white/5 text-primary focus:ring-primary"
+                            />
+                            Present
+                        </label>
+                    </div>
+                    <input
+                        type="month"
+                        disabled={formData.isCurrent}
+                        required={!formData.isCurrent}
+                        value={formData.isCurrent ? '' : (formData.endDate || '')}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary disabled:opacity-50"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Company Link</label>
+                    <input
+                        type="url"
+                        value={formData.link || ''}
+                        onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                <textarea
+                    required
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Technologies</label>
+                <div className="flex flex-wrap gap-2 mb-2">
+                    {formData.technologies?.map((tech, idx) => (
+                        <span key={idx} className="px-3 py-1 bg-white/10 rounded-full text-xs text-gray-300 flex items-center gap-1">
+                            {tech}
+                            <button
+                                type="button"
+                                onClick={() => setFormData({
+                                    ...formData,
+                                    technologies: formData.technologies?.filter((_, i) => i !== idx)
+                                })}
+                                className="hover:text-red-400"
+                            >
+                                <X size={12} />
+                            </button>
+                        </span>
+                    ))}
+                </div>
+                <div className="flex gap-2">
+                    <input
+                        type="text"
+                        value={newTech}
+                        onChange={(e) => setNewTech(e.target.value)}
+                        placeholder="Add technology..."
+                        className="flex-1 px-4 py-2 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none"
+                    />
+                    <button
+                        type="button"
+                        onClick={addTech}
+                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg transition-colors"
+                    >
+                        Add
+                    </button>
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Display Order</label>
+                <input
+                    type="number"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-gray-700 rounded-lg text-gray-300 transition-all"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="px-8 py-2 bg-primary hover:brightness-110 text-white rounded-lg font-medium shadow-lg shadow-primary/20 transition-all"
+                >
+                    {experience ? 'Save Changes' : 'Add Experience'}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+// ==================== ACADEMIC TAB ====================
+
+function AcademicTab() {
+    const [education, setEducation] = useState<Education[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [editingEdu, setEditingEdu] = useState<Education | null>(null);
+    const [isAdding, setIsAdding] = useState(false);
+
+    useEffect(() => {
+        loadEducation();
+    }, []);
+
+    const loadEducation = async () => {
+        setLoading(true);
+        const data = await getEducation();
+        setEducation(data);
+        setLoading(false);
+    };
+
+    const handleAddEducation = async (edu: Omit<Education, 'id'>) => {
+        await addEducation(edu);
+        loadEducation();
+        setIsAdding(false);
+    };
+
+    const handleUpdateEducation = async (id: string, updates: Partial<Education>) => {
+        await updateEducation(id, updates);
+        loadEducation();
+        setEditingEdu(null);
+    };
+
+    const handleDeleteEducation = async (id: string) => {
+        if (confirm('Are you sure you want to delete this education entry?')) {
+            await deleteEducation(id);
+            loadEducation();
+        }
+    };
+
+    if (isAdding || editingEdu) {
+        return (
+            <AcademicForm
+                education={editingEdu || undefined}
+                onSubmit={(data) => {
+                    if (editingEdu?.id) {
+                        handleUpdateEducation(editingEdu.id, data);
+                    } else {
+                        handleAddEducation(data);
+                    }
+                }}
+                onCancel={() => {
+                    setIsAdding(false);
+                    setEditingEdu(null);
+                }}
+            />
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">Manage Education</h2>
+                <button
+                    onClick={() => setIsAdding(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-lg transition-colors"
+                >
+                    <Plus size={18} />
+                    Add Education
+                </button>
+            </div>
+
+            {loading ? (
+                <SkeletonList />
+            ) : education.length === 0 ? (
+                <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-gray-700">
+                    <GraduationCap size={48} className="mx-auto text-gray-600 mb-4" />
+                    <p className="text-gray-400">No education entries found. Add your first one!</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {education.map((edu) => (
+                        <div
+                            key={edu.id}
+                            className="p-4 bg-white/5 rounded-xl border border-gray-700/50 flex items-center justify-between group"
+                        >
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-white">
+                                    {edu.degree} {edu.score && <span className="text-primary/70 text-sm ml-2">— {edu.score}</span>}
+                                </h3>
+                                <p className="text-primary text-sm font-medium">{edu.institution}</p>
+                                <p className="text-gray-400 text-sm mt-1">
+                                    {formatDate(edu.startDate)} — {edu.isCurrent ? 'Present' : (edu.endDate ? formatDate(edu.endDate) : 'Present')} {formatDuration(edu.startDate, edu.endDate, edu.isCurrent)}
+                                </p>
+                            </div>
+                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => setEditingEdu(edu)}
+                                    className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <Edit3 size={18} />
+                                </button>
+                                <button
+                                    onClick={() => edu.id && handleDeleteEducation(edu.id)}
+                                    className="p-2 bg-white/5 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function AcademicForm({
+    education,
+    onSubmit,
+    onCancel,
+}: {
+    education?: Education;
+    onSubmit: (education: Omit<Education, 'id'>) => void;
+    onCancel: () => void;
+}) {
+    const [formData, setFormData] = useState<Omit<Education, 'id'>>({
+        institution: education?.institution || '',
+        degree: education?.degree || '',
+        startDate: education?.startDate || '',
+        endDate: education?.endDate || '',
+        isCurrent: education?.isCurrent || false,
+        score: education?.score || '',
+        description: education?.description || '',
+        link: education?.link || '',
+        order: education?.order || 0,
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-xl font-bold text-white">
+                {education ? 'Edit Education' : 'Add Education'}
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Institution</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.institution}
+                        onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Degree/Qualification</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.degree}
+                        onChange={(e) => setFormData({ ...formData, degree: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Start Month/Year</label>
+                    <input
+                        type="month"
+                        required
+                        value={formData.startDate}
+                        onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <div className="flex items-center justify-between mb-2">
+                        <label className="block text-sm font-medium text-gray-300">End Month/Year</label>
+                        <label className="flex items-center gap-2 text-xs text-gray-400 cursor-pointer">
+                            <input
+                                type="checkbox"
+                                checked={formData.isCurrent}
+                                onChange={(e) => setFormData({ ...formData, isCurrent: e.target.checked })}
+                                className="rounded border-gray-700 bg-white/5 text-primary focus:ring-primary"
+                            />
+                            Present
+                        </label>
+                    </div>
+                    <input
+                        type="month"
+                        disabled={formData.isCurrent}
+                        required={!formData.isCurrent}
+                        value={formData.isCurrent ? '' : (formData.endDate || '')}
+                        onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary disabled:opacity-50"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Institution Link</label>
+                    <input
+                        type="url"
+                        value={formData.link || ''}
+                        onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Score/Percentage (Optional)</label>
+                    <input
+                        type="text"
+                        value={formData.score || ''}
+                        onChange={(e) => setFormData({ ...formData, score: e.target.value })}
+                        placeholder="e.g. 95% or CGPA: 9.8"
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
+                <textarea
+                    value={formData.description || ''}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Display Order</label>
+                <input
+                    type="number"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-gray-700 rounded-lg text-gray-300 transition-all"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="px-8 py-2 bg-primary hover:brightness-110 text-white rounded-lg font-medium shadow-lg shadow-primary/20 transition-all"
+                >
+                    {education ? 'Save Changes' : 'Add Education'}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+// ==================== ACHIEVEMENTS TAB ====================
+
+function AchievementsTab() {
+    const [achievements, setAchievements] = useState<Achievement[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [editingAch, setEditingAch] = useState<Achievement | null>(null);
+    const [isAdding, setIsAdding] = useState(false);
+
+    useEffect(() => {
+        loadAchievements();
+    }, []);
+
+    const loadAchievements = async () => {
+        setLoading(true);
+        const data = await getAchievements();
+        setAchievements(data);
+        setLoading(false);
+    };
+
+    const handleAddAchievement = async (ach: Omit<Achievement, 'id'>) => {
+        await addAchievement(ach);
+        loadAchievements();
+        setIsAdding(false);
+    };
+
+    const handleUpdateAchievement = async (id: string, updates: Partial<Achievement>) => {
+        await updateAchievement(id, updates);
+        loadAchievements();
+        setEditingAch(null);
+    };
+
+    const handleDeleteAchievement = async (id: string) => {
+        if (confirm('Are you sure you want to delete this achievement?')) {
+            await deleteAchievement(id);
+            loadAchievements();
+        }
+    };
+
+    if (isAdding || editingAch) {
+        return (
+            <AchievementForm
+                achievement={editingAch || undefined}
+                onSubmit={(data) => {
+                    if (editingAch?.id) {
+                        handleUpdateAchievement(editingAch.id, data);
+                    } else {
+                        handleAddAchievement(data);
+                    }
+                }}
+                onCancel={() => {
+                    setIsAdding(false);
+                    setEditingAch(null);
+                }}
+            />
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">Manage Achievements</h2>
+                <button
+                    onClick={() => setIsAdding(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-lg transition-colors"
+                >
+                    <Plus size={18} />
+                    Add Achievement
+                </button>
+            </div>
+
+            {loading ? (
+                <SkeletonList />
+            ) : achievements.length === 0 ? (
+                <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-gray-700">
+                    <Trophy size={48} className="mx-auto text-gray-600 mb-4" />
+                    <p className="text-gray-400">No achievements found. Add your first one!</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {achievements.map((ach) => (
+                        <div
+                            key={ach.id}
+                            className="p-4 bg-white/5 rounded-xl border border-gray-700/50 flex items-center justify-between group"
+                        >
+                            <div className="flex-1">
+                                <h3 className="text-lg font-bold text-white">{ach.title}</h3>
+                                <p className="text-primary text-sm font-medium">{ach.issuer}</p>
+                                <p className="text-gray-400 text-sm mt-1">{ach.date}</p>
+                            </div>
+                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => setEditingAch(ach)}
+                                    className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <Edit3 size={18} />
+                                </button>
+                                <button
+                                    onClick={() => ach.id && handleDeleteAchievement(ach.id)}
+                                    className="p-2 bg-white/5 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function AchievementForm({
+    achievement,
+    onSubmit,
+    onCancel,
+}: {
+    achievement?: Achievement;
+    onSubmit: (achievement: Omit<Achievement, 'id'>) => void;
+    onCancel: () => void;
+}) {
+    const [formData, setFormData] = useState<Omit<Achievement, 'id'>>({
+        title: achievement?.title || '',
+        issuer: achievement?.issuer || '',
+        date: achievement?.date || '',
+        description: achievement?.description || '',
+        link: achievement?.link || '',
+        imageUrl: achievement?.imageUrl || '',
+        order: achievement?.order || 0,
+    });
+    const [isUploading, setIsUploading] = useState(false);
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(formData);
+    };
+
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const url = await uploadImage(file, 'achievements');
+            setFormData({ ...formData, imageUrl: url });
+        } catch (error: any) {
+            alert(`Failed to upload: ${error.message}`);
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-xl font-bold text-white">
+                {achievement ? 'Edit Achievement' : 'Add Achievement'}
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Achievement Title</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Issuer</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.issuer}
+                        onChange={(e) => setFormData({ ...formData, issuer: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Date</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.date}
+                        onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Link</label>
+                    <input
+                        type="url"
+                        value={formData.link || ''}
+                        onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Achievement Image</label>
+                <div className="flex gap-4">
+                    {formData.imageUrl && (
+                        <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-gray-700">
+                            <img src={formData.imageUrl} alt="Achievement" className="w-full h-full object-cover" />
+                            <button
+                                type="button"
+                                onClick={() => setFormData({ ...formData, imageUrl: '' })}
+                                className="absolute top-1 right-1 p-1 bg-red-500 rounded-full text-white"
+                            >
+                                <X size={12} />
+                            </button>
+                        </div>
+                    )}
+                    <label className={`flex-1 flex flex-col items-center justify-center border-2 border-dashed border-gray-700 rounded-lg cursor-pointer hover:border-primary transition-colors ${isUploading ? 'opacity-50' : ''}`}>
+                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={isUploading} />
+                        {isUploading ? <Loader2 size={24} className="animate-spin text-gray-500" /> : <Upload size={24} className="text-gray-500 mb-2" />}
+                        <span className="text-sm text-gray-400">Click to upload badge or certificate image</span>
+                    </label>
+                </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Description (Optional)</label>
+                <textarea
+                    value={formData.description || ''}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    rows={4}
+                    className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                />
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Display Order</label>
+                <input
+                    type="number"
+                    value={formData.order}
+                    onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                    className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-gray-700 rounded-lg text-gray-300 transition-all"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="px-8 py-2 bg-primary hover:brightness-110 text-white rounded-lg font-medium shadow-lg shadow-primary/20 transition-all"
+                >
+                    {achievement ? 'Save Changes' : 'Add Achievement'}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+// ==================== SERVICES TAB ====================
+
+function ServicesTab() {
+    const [services, setServices] = useState<Service[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [editingServ, setEditingServ] = useState<Service | null>(null);
+    const [isAdding, setIsAdding] = useState(false);
+
+    useEffect(() => {
+        loadServices();
+    }, []);
+
+    const loadServices = async () => {
+        setLoading(true);
+        const data = await getServices();
+        setServices(data);
+        setLoading(false);
+    };
+
+    const handleAddService = async (serv: Omit<Service, 'id'>) => {
+        await addService(serv);
+        loadServices();
+        setIsAdding(false);
+    };
+
+    const handleUpdateService = async (id: string, updates: Partial<Service>) => {
+        await updateService(id, updates);
+        loadServices();
+        setEditingServ(null);
+    };
+
+    const handleDeleteService = async (id: string) => {
+        if (confirm('Are you sure you want to delete this service?')) {
+            await deleteService(id);
+            loadServices();
+        }
+    };
+
+    if (isAdding || editingServ) {
+        return (
+            <ServiceForm
+                service={editingServ || undefined}
+                onSubmit={(data) => {
+                    if (editingServ?.id) {
+                        handleUpdateService(editingServ.id, data);
+                    } else {
+                        handleAddService(data);
+                    }
+                }}
+                onCancel={() => {
+                    setIsAdding(false);
+                    setEditingServ(null);
+                }}
+            />
+        );
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold text-white">Manage Services</h2>
+                <button
+                    onClick={() => setIsAdding(true)}
+                    className="flex items-center gap-2 px-4 py-2 bg-primary hover:brightness-110 text-white rounded-lg transition-colors"
+                >
+                    <Plus size={18} />
+                    Add Service
+                </button>
+            </div>
+
+            {loading ? (
+                <SkeletonList />
+            ) : services.length === 0 ? (
+                <div className="text-center py-12 bg-white/5 rounded-xl border border-dashed border-gray-700">
+                    <Layout size={48} className="mx-auto text-gray-600 mb-4" />
+                    <p className="text-gray-400">No services found. Add your first one!</p>
+                </div>
+            ) : (
+                <div className="space-y-4">
+                    {services.map((serv) => (
+                        <div
+                            key={serv.id}
+                            className="p-4 bg-white/5 rounded-xl border border-gray-700/50 flex items-center justify-between group"
+                        >
+                            <div className="flex items-center gap-4">
+                                <div className="p-2 bg-primary/10 rounded-lg text-primary">
+                                    <Layout size={20} />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-white">{serv.title}</h3>
+                                    <p className="text-gray-400 text-sm line-clamp-1">{serv.description}</p>
+                                </div>
+                            </div>
+                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                    onClick={() => setEditingServ(serv)}
+                                    className="p-2 bg-white/5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                                >
+                                    <Edit3 size={18} />
+                                </button>
+                                <button
+                                    onClick={() => serv.id && handleDeleteService(serv.id)}
+                                    className="p-2 bg-white/5 hover:bg-red-500/20 rounded-lg text-gray-400 hover:text-red-400 transition-colors"
+                                >
+                                    <Trash2 size={18} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function ServiceForm({
+    service,
+    onSubmit,
+    onCancel,
+}: {
+    service?: Service;
+    onSubmit: (service: Omit<Service, 'id'>) => void;
+    onCancel: () => void;
+}) {
+    const [formData, setFormData] = useState<Omit<Service, 'id'>>({
+        title: service?.title || '',
+        description: service?.description || '',
+        icon: service?.icon || 'Code',
+        order: service?.order || 0,
+    });
+
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSubmit(formData);
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-xl font-bold text-white">
+                {service ? 'Edit Service' : 'Add Service'}
+            </h2>
+
+            <div className="space-y-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Service Title</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Icon Name (Lucide)</label>
+                    <input
+                        type="text"
+                        required
+                        value={formData.icon}
+                        onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                        placeholder="Code, Layout, Server, Database, Smartphone..."
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Visit lucide.dev for icon names.</p>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Description</label>
+                    <textarea
+                        required
+                        value={formData.description}
+                        onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        rows={4}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary resize-none"
+                    />
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Display Order</label>
+                    <input
+                        type="number"
+                        value={formData.order}
+                        onChange={(e) => setFormData({ ...formData, order: parseInt(e.target.value) || 0 })}
+                        className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                    />
+                </div>
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4">
+                <button
+                    type="button"
+                    onClick={onCancel}
+                    className="px-6 py-2 bg-white/5 hover:bg-white/10 border border-gray-700 rounded-lg text-gray-300 transition-all"
+                >
+                    Cancel
+                </button>
+                <button
+                    type="submit"
+                    className="px-8 py-2 bg-primary hover:brightness-110 text-white rounded-lg font-medium shadow-lg shadow-primary/20 transition-all"
+                >
+                    {service ? 'Save Changes' : 'Add Service'}
+                </button>
+            </div>
+        </form>
+    );
+}
+
+// ==================== LAYOUT TAB ====================
+
+function LayoutTab({
+    layout,
+    updateLayout,
+}: {
+    layout: SiteConfig['layout'];
+    updateLayout: (layout: Partial<SiteConfig['layout']>) => void;
+}) {
+    const sections = layout?.sectionOrder || ['hero', 'about', 'experience', 'services', 'academic', 'achievements', 'projects', 'friends', 'contact'];
+    const hiddenSections = layout?.hiddenSections || [];
+
+    const handleReorder = (newOrder: string[]) => {
+        updateLayout({ sectionOrder: newOrder });
+    };
+
+    const toggleVisibility = (sectionId: string) => {
+        const newHidden = hiddenSections.includes(sectionId)
+            ? hiddenSections.filter(id => id !== sectionId)
+            : [...hiddenSections, sectionId];
+        updateLayout({ hiddenSections: newHidden });
+    };
+
+    const moveSection = (index: number, direction: 'up' | 'down') => {
+        const newSections = [...sections];
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+
+        if (targetIndex >= 0 && targetIndex < newSections.length) {
+            [newSections[index], newSections[targetIndex]] = [newSections[targetIndex], newSections[index]];
+            updateLayout({ sectionOrder: newSections });
+        }
+    };
+
+    const sectionLabels: Record<string, string> = {
+        hero: 'Hero Section',
+        about: 'About Me',
+        experience: 'Work Experience',
+        services: 'Services & Expertise',
+        academic: 'Academic Background',
+        achievements: 'Achievements & Certifications',
+        projects: 'Projects Showcase',
+        friends: 'Friends Section',
+        contact: 'Contact Section',
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-xl font-bold text-white">Page Layout</h2>
+                    <p className="text-gray-400 text-sm mt-1">Click and drag handles or use arrows to reorder sections.</p>
+                </div>
+            </div>
+
+            <Reorder.Group
+                axis="y"
+                values={sections}
+                onReorder={handleReorder}
+                className="bg-white/5 rounded-xl border border-gray-700/50 overflow-hidden divide-y divide-gray-700/50"
+            >
+                {sections.map((sectionId, index) => (
+                    <ReorderItem
+                        key={sectionId}
+                        sectionId={sectionId}
+                        label={sectionLabels[sectionId] || sectionId}
+                        index={index}
+                        total={sections.length}
+                        isHidden={hiddenSections.includes(sectionId)}
+                        onMove={moveSection}
+                        onToggleVisibility={toggleVisibility}
+                    />
+                ))}
+            </Reorder.Group>
+
+            <div className="p-4 bg-primary/10 border border-primary/20 rounded-xl">
+                <p className="text-sm text-primary flex items-center gap-2">
+                    <Check size={16} />
+                    Drag the icons on the left to reorder sections instantly.
+                </p>
+            </div>
+        </div>
+    );
+}
+
+function ReorderItem({
+    sectionId,
+    label,
+    index,
+    total,
+    isHidden,
+    onMove,
+    onToggleVisibility
+}: {
+    sectionId: string;
+    label: string;
+    index: number;
+    total: number;
+    isHidden: boolean;
+    onMove: (index: number, direction: 'up' | 'down') => void;
+    onToggleVisibility: (sectionId: string) => void;
+}) {
+    const controls = useDragControls();
+
+    return (
+        <Reorder.Item
+            value={sectionId}
+            dragListener={false}
+            dragControls={controls}
+            className={`flex items-center justify-between p-4 hover:bg-white/5 transition-colors group select-none bg-gray-900/40 ${isHidden ? 'opacity-50 grayscale' : ''}`}
+        >
+            <div className="flex items-center gap-4">
+                <div
+                    className="text-gray-600 group-hover:text-primary transition-colors cursor-grab active:cursor-grabbing p-1 -ml-1"
+                    onPointerDown={(e) => controls.start(e)}
+                >
+                    <GripVertical size={20} />
+                </div>
+                <div>
+                    <h3 className={`font-medium capitalize ${isHidden ? 'text-gray-500' : 'text-white'}`}>
+                        {label}
+                        {isHidden && <span className="ml-2 text-[10px] bg-white/5 px-1.5 py-0.5 rounded text-gray-400">HIDDEN</span>}
+                    </h3>
+                    <p className="text-xs text-gray-500">ID: {sectionId}</p>
+                </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+                <button
+                    onClick={() => onToggleVisibility(sectionId)}
+                    className={`p-2 rounded-lg transition-all ${isHidden ? 'bg-white/5 text-gray-400 hover:text-white' : 'bg-primary/10 text-primary hover:bg-primary/20'}`}
+                    title={isHidden ? "Show Section" : "Hide Section"}
+                >
+                    {isHidden ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+                <button
+                    onClick={() => onMove(index, 'up')}
+                    disabled={index === 0}
+                    className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white disabled:opacity-20 transition-all md:flex hidden"
+                    title="Move Up"
+                >
+                    <MoveUp size={18} />
+                </button>
+                <button
+                    onClick={() => onMove(index, 'down')}
+                    disabled={index === total - 1}
+                    className="p-2 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white disabled:opacity-20 transition-all md:flex hidden"
+                    title="Move Down"
+                >
+                    <MoveDown size={18} />
+                </button>
+            </div>
+        </Reorder.Item>
+    );
+}
+
+function UsersTab() {
+    const [users, setUsers] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [updatingUid, setUpdatingUid] = useState<string | null>(null);
+
+    useEffect(() => {
+        loadUsers();
+    }, []);
+
+    const loadUsers = async () => {
+        try {
+            const fetchedUsers = await getAllUsers();
+            setUsers(fetchedUsers);
+        } catch (err) {
+            console.error('Failed to load users:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRoleChange = async (uid: string, newRole: UserRole) => {
+        setUpdatingUid(uid);
+        try {
+            await updateUserRole(uid, newRole);
+            setUsers(prev => prev.map(u => u.uid === uid ? { ...u, role: newRole } : u));
+        } catch (err) {
+            console.error('Failed to update role:', err);
+            alert('Failed to update user role');
+        } finally {
+            setUpdatingUid(null);
+        }
+    };
+
+    const roles: UserRole[] = ['user', 'player', 'admin', 'vip', 'beta_tester', 'friend', 'guest'];
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h2 className="text-xl font-bold text-white">User Management</h2>
+                    <p className="text-gray-400 text-sm">Manage user roles and permissions (RBAC)</p>
+                </div>
+            </div>
+
+            {loading ? (
+                <div className="space-y-4">
+                    {[1, 2, 3].map(i => <Skeleton key={i} className="h-20 w-full rounded-xl" />)}
+                </div>
+            ) : (
+                <div className="grid gap-4">
+                    {users.map((u) => (
+                        <div key={u.uid} className="bg-black/20 border border-gray-700/50 rounded-xl p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="h-10 w-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                                    {u.photoURL ? (
+                                        <img src={u.photoURL} alt="" className="h-full w-full rounded-full object-cover" />
+                                    ) : (
+                                        (u.displayName?.[0] || u.email?.[0] || '?').toUpperCase()
+                                    )}
+                                </div>
+                                <div>
+                                    <h3 className="text-white font-medium">{u.displayName || u.email || 'Anonymous User'}</h3>
+                                    <p className="text-xs text-gray-500">{u.uid}</p>
+                                    <p className="text-xs text-gray-400">{u.email}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-wrap gap-2">
+                                {roles.map((role) => (
+                                    <button
+                                        key={role}
+                                        disabled={updatingUid === u.uid}
+                                        onClick={() => handleRoleChange(u.uid, role)}
+                                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all border ${u.role === role
+                                            ? 'bg-primary border-primary text-white'
+                                            : 'bg-white/5 border-gray-700 text-gray-400 hover:text-white hover:bg-white/10'
+                                            } ${updatingUid === u.uid ? 'opacity-50 cursor-wait' : ''}`}
+                                    >
+                                        {role === u.role && updatingUid === u.uid ? (
+                                            <Loader2 size={12} className="animate-spin" />
+                                        ) : (
+                                            role
+                                        )}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                    {users.length === 0 && (
+                        <div className="text-center py-12 bg-black/20 rounded-xl border border-gray-700/50">
+                            <Users className="mx-auto text-gray-600 mb-4" size={48} />
+                            <p className="text-gray-400">No users found in the database.</p>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 }

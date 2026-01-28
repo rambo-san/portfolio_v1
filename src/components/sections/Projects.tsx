@@ -30,8 +30,8 @@ export function Projects() {
     }, []);
 
     return (
-        <section id="projects" className="py-24 px-4 overflow-hidden">
-            <div className="container mx-auto max-w-6xl">
+        <section id="projects" className="py-24 relative overflow-hidden">
+            <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}

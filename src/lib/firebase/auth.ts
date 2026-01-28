@@ -18,7 +18,7 @@ const googleProvider = new GoogleAuthProvider();
 const githubProvider = new GithubAuthProvider();
 
 // User roles for RBAC
-export type UserRole = 'admin' | 'player' | 'guest';
+export type UserRole = 'admin' | 'player' | 'user' | 'guest' | 'vip' | 'beta_tester' | 'friend';
 
 // User profile interface
 export interface UserProfile {
@@ -35,7 +35,7 @@ export interface UserProfile {
  * Create user profile in Firestore after registration
  * Roles are managed via Firebase Console -> Firestore -> users collection
  */
-async function createUserProfile(firebaseUser: User, role: UserRole = 'player'): Promise<void> {
+async function createUserProfile(firebaseUser: User, role: UserRole = 'user'): Promise<void> {
     const userRef = doc(db, 'users', firebaseUser.uid);
     const userSnap = await getDoc(userRef);
 
@@ -84,7 +84,7 @@ export async function signUpWithEmail(
     }
 
     // Create user profile in Firestore
-    await createUserProfile(userCredential.user, 'player');
+    await createUserProfile(userCredential.user, 'user');
 
     return userCredential;
 }
@@ -142,9 +142,13 @@ export async function hasRole(uid: string, requiredRole: UserRole): Promise<bool
 
     // Role hierarchy: admin > player > guest
     const roleHierarchy: Record<UserRole, number> = {
-        admin: 3,
+        admin: 10,
+        vip: 5,
+        beta_tester: 4,
+        friend: 3,
         player: 2,
-        guest: 1,
+        user: 1,
+        guest: 0,
     };
 
     return roleHierarchy[profile.role] >= roleHierarchy[requiredRole];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Gamepad2, Trophy, Flame, Bird, User, LogIn } from "lucide-react";
 import Link from "next/link";
@@ -10,6 +10,8 @@ import { AuthModal } from "@/components/auth/AuthModal";
 import { Button } from "@/components/ui/button";
 
 import { useSiteConfig } from "@/context/SiteConfigContext";
+import { getGameConfigs, GameConfig } from "@/lib/firebase/firestore";
+import { Lock } from "lucide-react";
 
 const games = [
     {
@@ -39,9 +41,29 @@ const games = [
 export default function Arcade() {
     const { user, loading: authLoading } = useAuth();
     const { config, loading: configLoading } = useSiteConfig();
+    const { profile } = useAuth(); // Profile has the role
     const { guestName, setGuestName, hasGuestName } = useGuestName();
     const [nameInput, setNameInput] = useState("");
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [gameConfigs, setGameConfigs] = useState<Record<string, GameConfig>>({});
+    const [loadingConfigs, setLoadingConfigs] = useState(true);
+
+    // Load game configs for RBAC
+    useEffect(() => {
+        async function loadConfigs() {
+            try {
+                const configs = await getGameConfigs();
+                const configMap: Record<string, GameConfig> = {};
+                configs.forEach(c => configMap[c.id] = c);
+                setGameConfigs(configMap);
+            } catch (err) {
+                console.error("Failed to load game configs:", err);
+            } finally {
+                setLoadingConfigs(false);
+            }
+        }
+        loadConfigs();
+    }, []);
 
     const loading = authLoading || configLoading;
 
@@ -75,7 +97,7 @@ export default function Arcade() {
                         >
                             <Gamepad2 size={64} className="text-primary" />
                         </motion.div>
-                        <h1 className="text-5xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary via-white to-primary/80 mb-6">
+                        <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary via-white to-primary/80 mb-6">
                             Engineering Arcade
                         </h1>
                         <p className="text-slate-400 max-w-2xl mx-auto text-lg">
@@ -208,8 +230,37 @@ export default function Arcade() {
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: i * 0.1 }}
-                                    className={`rounded-3xl bg-white/5 border border-white/10 p-8 flex flex-col ${game.status !== "Active" ? "opacity-50 grayscale" : "hover:bg-white/10 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)]"} transition-all duration-300 group`}
+                                    className={`rounded-3xl bg-white/5 border border-white/10 p-8 flex flex-col ${game.status !== "Active" ? "opacity-50 grayscale" : "hover:bg-white/10 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)]"} transition-all duration-300 group overflow-hidden relative`}
                                 >
+                                    {/* RBAC Lockdown Check */}
+                                    {(() => {
+                                        const config = gameConfigs[game.id];
+                                        if (!config) return null;
+
+                                        const userRole = profile?.role || 'guest';
+                                        const allowedRoles = config.allowedRoles || ['player', 'admin']; // Default
+                                        const isAllowed = allowedRoles.includes(userRole) || userRole === 'admin';
+
+                                        if (!isAllowed) {
+                                            return (
+                                                <div className="absolute inset-0 z-20 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
+                                                    <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
+                                                        <Lock className="text-red-500" size={32} />
+                                                    </div>
+                                                    <h4 className="text-xl font-bold text-white mb-2">Access Restricted</h4>
+                                                    <p className="text-gray-400 text-sm mb-4">
+                                                        This game is only available for: <br />
+                                                        <span className="text-primary font-medium">{allowedRoles.join(', ')}</span>
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        Your current role: <span className="capitalize">{userRole}</span>
+                                                    </p>
+                                                </div>
+                                            );
+                                        }
+                                        return null;
+                                    })()}
+
                                     <div className="flex justify-between items-start mb-6">
                                         <div
                                             className={`px-3 py-1 rounded-full text-xs font-mono border ${game.difficulty === "Hard"
