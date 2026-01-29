@@ -89,7 +89,7 @@ export default function Arcade() {
         <>
             <div className="min-h-screen pt-12 pb-12 px-4 crt-overlay bg-[#050505]">
                 {/* Vintage Grid Overlay */}
-                <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-0 pointer-events-none" />
+                <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-0 pointer-events-none" />
 
                 <div className="container mx-auto relative z-10">
                     <header className="mb-16 text-center pt-8">
@@ -154,51 +154,52 @@ export default function Arcade() {
                                 exit={{ opacity: 0, y: -20 }}
                                 className="max-w-md mx-auto mb-12"
                             >
-                                <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 p-8 text-center relative overflow-hidden">
-                                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-3xl" />
-                                    <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-primary/10 rounded-full blur-3xl" />
+                                <div className="bg-[#0a0a0a] border-4 border-primary shadow-[12px_12px_0px_rgba(0,0,0,0.5)] pixel-corners p-8 text-center relative overflow-hidden">
+                                    <div className="absolute inset-0 opacity-5 pointer-events-none bg-[radial-gradient(circle_at_center,var(--primary)_1px,transparent_1px)] bg-[size:20px_20px]" />
 
                                     <div className="relative z-10">
-                                        <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
+                                        <div className="w-16 h-16 bg-primary/10 border-2 border-primary/30 flex items-center justify-center mx-auto mb-6 pixel-corners">
                                             <User size={32} className="text-primary" />
                                         </div>
-                                        <h2 className="text-xl font-bold text-white mb-2">Welcome to the Arcade!</h2>
-                                        <p className="text-gray-400 text-sm mb-6">
-                                            Enter your name to get started, or sign in to save your scores.
+                                        <h2 className="text-2xl font-black text-white mb-2 uppercase italic tracking-tighter">ARCADE_ENTRY</h2>
+                                        <p className="text-primary/60 font-mono text-[10px] uppercase mb-8 tracking-widest">
+                                            Initialization required for high-score tracking.
                                         </p>
 
-                                        <div className="space-y-3">
-                                            <input
-                                                type="text"
-                                                value={nameInput}
-                                                onChange={(e) => setNameInput(e.target.value)}
-                                                onKeyDown={(e) => e.key === "Enter" && handleSetGuestName()}
-                                                placeholder="Enter your name"
-                                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 text-center"
-                                                autoFocus
-                                            />
-                                            <Button
-                                                onClick={handleSetGuestName}
-                                                disabled={nameInput.trim().length < 2}
-                                                className="w-full"
-                                            >
-                                                Play as Guest
-                                            </Button>
-
-                                            <div className="flex items-center gap-4 my-4">
-                                                <div className="flex-1 h-px bg-gray-700" />
-                                                <span className="text-gray-500 text-xs">or</span>
-                                                <div className="flex-1 h-px bg-gray-700" />
+                                        <div className="space-y-4">
+                                            <div className="relative group">
+                                                <input
+                                                    type="text"
+                                                    value={nameInput}
+                                                    onChange={(e) => setNameInput(e.target.value)}
+                                                    onKeyDown={(e) => e.key === "Enter" && handleSetGuestName()}
+                                                    placeholder="Enter operator name..."
+                                                    className="w-full px-4 py-4 bg-black border-2 border-primary/20 text-white font-mono text-xs placeholder:text-white/20 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all pixel-corners text-center"
+                                                    autoFocus
+                                                />
                                             </div>
 
-                                            <Button
-                                                variant="outline"
-                                                onClick={() => setShowAuthModal(true)}
-                                                className="w-full"
+                                            <button
+                                                onClick={handleSetGuestName}
+                                                disabled={nameInput.trim().length < 2}
+                                                className="w-full py-4 bg-primary text-black font-black uppercase tracking-[0.2em] pixel-corners shadow-[6px_6px_0px_rgba(var(--primary-rgb),0.3)] hover:bg-white transition-all disabled:opacity-30 disabled:cursor-not-allowed active:translate-y-[2px] active:translate-x-[2px] active:shadow-none"
                                             >
-                                                <LogIn size={18} />
-                                                Sign in with Google
-                                            </Button>
+                                                START_GUEST_SESSION
+                                            </button>
+
+                                            <div className="flex items-center gap-4 my-6">
+                                                <div className="flex-1 h-[1px] bg-primary/20" />
+                                                <span className="text-[9px] font-mono text-primary/40 uppercase tracking-widest">or_relay</span>
+                                                <div className="flex-1 h-[1px] bg-primary/20" />
+                                            </div>
+
+                                            <button
+                                                onClick={() => setShowAuthModal(true)}
+                                                className="w-full flex items-center justify-center gap-3 py-4 bg-black border-2 border-primary/20 text-white font-black text-xs uppercase tracking-widest pixel-corners hover:bg-primary/5 hover:border-primary transition-all"
+                                            >
+                                                <LogIn size={18} className="text-primary" />
+                                                Identify_Operator
+                                            </button>
                                         </div>
                                     </div>
                                 </div>

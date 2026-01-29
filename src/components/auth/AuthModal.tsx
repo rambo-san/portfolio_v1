@@ -91,103 +91,104 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                    className="relative w-full max-w-md bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl shadow-2xl border border-gray-700/50 overflow-hidden"
+                    className="relative w-full max-w-md bg-[#0a0a0a] border-4 border-primary shadow-[15px_15px_0px_rgba(0,0,0,0.5)] pixel-corners overflow-hidden"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Decorative gradient orb */}
-                    <div className="absolute -top-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/30 to-secondary/30 rounded-full blur-3xl" />
-                    <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-gradient-to-br from-secondary/30 to-primary/30 rounded-full blur-3xl" />
+                    {/* Retro Grid Background */}
+                    <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(circle_at_center,var(--primary)_1px,transparent_1px)] bg-[size:20px_20px]" />
 
                     {/* Header */}
-                    <div className="relative px-8 pt-8 pb-4">
+                    <div className="relative px-8 pt-10 pb-6 border-b-2 border-primary/20 bg-primary/5">
                         <button
                             onClick={onClose}
-                            className="absolute right-4 top-4 p-2 rounded-full text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+                            className="absolute right-4 top-4 p-1 border-2 border-primary/20 text-primary hover:bg-primary hover:text-black transition-all pixel-corners"
                         >
-                            <X size={20} />
+                            <X size={18} />
                         </button>
 
-                        <h2 className="text-2xl font-bold text-white">
-                            {mode === 'login' && 'Welcome Back'}
-                            {mode === 'signup' && 'Create Account'}
-                            {mode === 'reset' && 'Reset Password'}
-                        </h2>
-                        <p className="text-gray-400 mt-1">
-                            {mode === 'login' && 'Sign in to track your game scores'}
-                            {mode === 'signup' && 'Join to save your gaming progress'}
-                            {mode === 'reset' && "We'll send you a reset link"}
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-3 h-3 bg-primary animate-pulse" />
+                            <h2 className="text-3xl font-black text-white uppercase tracking-tighter italic">
+                                {mode === 'login' && 'AUTH://LOGIN'}
+                                {mode === 'signup' && 'AUTH://SIGNUP'}
+                                {mode === 'reset' && 'AUTH://RECOVERY'}
+                            </h2>
+                        </div>
+                        <p className="text-[10px] font-mono text-primary/60 uppercase tracking-widest">
+                            {mode === 'login' && 'Verification mode: active'}
+                            {mode === 'signup' && 'New operator enrollment'}
+                            {mode === 'reset' && "Initiating credential recovery"}
                         </p>
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="relative px-8 pb-8 space-y-4">
+                    <form onSubmit={handleSubmit} className="relative px-8 py-8 space-y-5">
                         {/* Error/Success Messages */}
                         {(localError || error) && (
                             <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="flex items-center gap-2 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="flex items-center gap-3 p-4 bg-red-500/10 border-2 border-red-500 text-red-500 font-mono text-[10px] uppercase italic font-bold pixel-corners crt-flicker"
                             >
                                 <AlertCircle size={16} />
-                                {localError || error}
+                                ERROR: {localError || error}
                             </motion.div>
                         )}
 
                         {successMessage && (
                             <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30 text-green-400 text-sm"
+                                initial={{ opacity: 0, x: -10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                className="flex items-center gap-3 p-4 bg-green-500/10 border-2 border-green-500 text-green-500 font-mono text-[10px] uppercase italic font-bold pixel-corners"
                             >
-                                {successMessage}
+                                SUCCESS: {successMessage}
                             </motion.div>
                         )}
 
                         {/* Display Name (signup only) */}
                         {mode === 'signup' && (
-                            <div className="relative">
-                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                            <div className="relative group">
+                                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 group-focus-within:text-primary transition-colors" size={18} />
                                 <input
                                     type="text"
                                     value={displayName}
                                     onChange={(e) => setDisplayName(e.target.value)}
-                                    placeholder="Display Name"
-                                    className="w-full pl-10 pr-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all"
+                                    placeholder="Enter operator name..."
+                                    className="w-full pl-10 pr-4 py-4 bg-black border-2 border-primary/30 text-white font-mono text-xs placeholder:text-white/20 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all pixel-corners"
                                 />
                             </div>
                         )}
 
                         {/* Email */}
-                        <div className="relative">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <div className="relative group">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 group-focus-within:text-primary transition-colors" size={18} />
                             <input
                                 type="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Email address"
+                                placeholder="Enter email address..."
                                 required
-                                className="w-full pl-10 pr-4 py-3 bg-white/5 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all"
+                                className="w-full pl-10 pr-4 py-4 bg-black border-2 border-primary/30 text-white font-mono text-xs placeholder:text-white/20 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all pixel-corners"
                             />
                         </div>
 
                         {/* Password */}
                         {mode !== 'reset' && (
-                            <div className="relative">
-                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                            <div className="relative group">
+                                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-primary/60 group-focus-within:text-primary transition-colors" size={18} />
                                 <input
                                     type={showPassword ? 'text' : 'password'}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    placeholder="Password"
+                                    placeholder="Enter access key..."
                                     required
                                     minLength={6}
-                                    className="w-full pl-10 pr-12 py-3 bg-white/5 border border-gray-700 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20 transition-all"
+                                    className="w-full pl-10 pr-12 py-4 bg-black border-2 border-primary/30 text-white font-mono text-xs placeholder:text-white/20 focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/10 transition-all pixel-corners"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/60 hover:text-primary transition-colors"
                                 >
                                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                                 </button>
@@ -199,9 +200,9 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
                             <button
                                 type="button"
                                 onClick={() => switchMode('reset')}
-                                className="text-sm text-primary hover:brightness-110 transition-colors"
+                                className="text-[10px] font-mono text-primary/80 hover:text-primary hover:underline uppercase tracking-tighter"
                             >
-                                Forgot password?
+                                [ LOST_PASSWORD? ]
                             </button>
                         )}
 
@@ -209,25 +210,25 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full py-3 px-4 bg-primary hover:brightness-110 text-white font-semibold rounded-xl shadow-lg shadow-primary/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+                            className="w-full py-4 px-4 bg-primary text-black font-black uppercase tracking-[0.2em] pixel-corners shadow-[6px_6px_0px_rgba(var(--primary-rgb),0.3)] hover:bg-white transition-all disabled:opacity-30 disabled:cursor-not-allowed group active:translate-y-[2px] active:translate-x-[2px] active:shadow-none"
                         >
                             {isSubmitting ? (
                                 <Loader2 className="animate-spin" size={20} />
                             ) : (
                                 <>
-                                    {mode === 'login' && 'Sign In'}
-                                    {mode === 'signup' && 'Create Account'}
-                                    {mode === 'reset' && 'Send Reset Link'}
+                                    {mode === 'login' && 'EXECUTE_LOGIN'}
+                                    {mode === 'signup' && 'INITIALIZE_ACCOUNT'}
+                                    {mode === 'reset' && 'PROCESS_RECOVERY'}
                                 </>
                             )}
                         </button>
 
                         {/* Divider */}
                         {mode !== 'reset' && (
-                            <div className="flex items-center gap-4 my-6">
-                                <div className="flex-1 h-px bg-gray-700" />
-                                <span className="text-gray-500 text-sm">or continue with</span>
-                                <div className="flex-1 h-px bg-gray-700" />
+                            <div className="flex items-center gap-4 my-8">
+                                <div className="flex-1 h-[1px] bg-primary/30" />
+                                <span className="text-[9px] font-mono text-primary/60 uppercase tracking-widest leading-none">External_Relay</span>
+                                <div className="flex-1 h-[1px] bg-primary/30" />
                             </div>
                         )}
 
@@ -237,63 +238,63 @@ export function AuthModal({ isOpen, onClose, initialMode = 'login' }: AuthModalP
                                 type="button"
                                 onClick={handleGoogleLogin}
                                 disabled={isSubmitting}
-                                className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white/5 hover:bg-white/10 border border-gray-700 rounded-xl text-white font-medium transition-all disabled:opacity-50"
+                                className="w-full flex items-center justify-center gap-3 py-4 px-4 bg-black border-2 border-primary/30 text-white font-black text-xs uppercase tracking-widest pixel-corners hover:bg-primary/10 hover:border-primary transition-all disabled:opacity-30"
                             >
-                                <svg className="w-5 h-5" viewBox="0 0 24 24">
+                                <svg className="w-5 h-5 opacity-70 contrast-125" viewBox="0 0 24 24">
                                     <path
-                                        fill="#4285F4"
+                                        fill="currentColor"
                                         d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
                                     />
                                     <path
-                                        fill="#34A853"
+                                        fill="currentColor"
                                         d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
                                     />
                                     <path
-                                        fill="#FBBC05"
+                                        fill="currentColor"
                                         d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
                                     />
                                     <path
-                                        fill="#EA4335"
+                                        fill="currentColor"
                                         d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                                     />
                                 </svg>
-                                Continue with Google
+                                Relay_G_Net
                             </button>
                         )}
 
                         {/* Mode Switch */}
-                        <div className="text-center text-gray-400 text-sm pt-4">
+                        <div className="text-center pt-4">
                             {mode === 'login' && (
-                                <>
-                                    Don&apos;t have an account?{' '}
+                                <p className="text-[10px] font-mono text-primary/40 uppercase">
+                                    No profile found?{' '}
                                     <button
                                         type="button"
                                         onClick={() => switchMode('signup')}
-                                        className="text-primary hover:brightness-110 font-medium transition-colors"
+                                        className="text-primary hover:text-white font-bold underline underline-offset-4 transition-colors"
                                     >
-                                        Sign up
+                                        [ REGISTER_NEW ]
                                     </button>
-                                </>
+                                </p>
                             )}
                             {mode === 'signup' && (
-                                <>
-                                    Already have an account?{' '}
+                                <p className="text-[10px] font-mono text-primary/40 uppercase">
+                                    Existing operator?{' '}
                                     <button
                                         type="button"
                                         onClick={() => switchMode('login')}
-                                        className="text-primary hover:brightness-110 font-medium transition-colors"
+                                        className="text-primary hover:text-white font-bold underline underline-offset-4 transition-colors"
                                     >
-                                        Sign in
+                                        [ LOGIN_SYSTEM ]
                                     </button>
-                                </>
+                                </p>
                             )}
                             {mode === 'reset' && (
                                 <button
                                     type="button"
                                     onClick={() => switchMode('login')}
-                                    className="text-primary hover:brightness-110 font-medium transition-colors"
+                                    className="text-[10px] font-mono text-primary hover:text-white font-bold underline underline-offset-4 transition-colors uppercase"
                                 >
-                                    Back to sign in
+                                    [ RETURN_TO_LOGIN ]
                                 </button>
                             )}
                         </div>

@@ -9,7 +9,7 @@ export function Footer() {
     const { socialLinks, contact, hero } = config;
 
     return (
-        <section id="contact" className="py-20 md:py-32 relative overflow-hidden bg-foreground text-background">
+        <section id="contact" className="py-12 md:py-32 relative overflow-hidden bg-foreground text-background">
             <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
 
@@ -42,14 +42,14 @@ export function Footer() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
                         {/* Email Card (Large) */}
                         {socialLinks.email && (
-                            <Link href={`mailto:${socialLinks.email}`} className="col-span-1 sm:col-span-2 group retro-card bg-background/5 p-5 md:p-6 flex items-center justify-between hover:bg-background/10 transition-colors cursor-pointer border-background shadow-[4px_4px_0px_var(--background)] hover:shadow-[2px_2px_0px_var(--background)] hover:translate-x-[2px] hover:translate-y-[2px]">
+                            <Link href={`mailto:${socialLinks.email}`} className="col-span-1 sm:col-span-2 group retro-card bg-[#0a0a0a] p-5 md:p-6 flex items-center justify-between hover:bg-black transition-colors cursor-pointer border-background shadow-[4px_4px_0px_var(--background)] hover:shadow-[2px_2px_0px_var(--background)] hover:translate-x-[2px] hover:translate-y-[2px]">
                                 <div className="flex items-center gap-4 min-w-0">
-                                    <div className="hidden sm:flex p-3 bg-background border-[length:var(--border-width)] border-foreground rounded-[radius:var(--border-radius)] shrink-0">
-                                        <Mail size={24} className="text-foreground" />
+                                    <div className="hidden sm:flex p-3 bg-white/5 border border-white/10 rounded-[radius:var(--border-radius)] shrink-0">
+                                        <Mail size={24} className="text-primary" />
                                     </div>
                                     <div className="min-w-0">
-                                        <div className="font-mono text-xs text-background/60 uppercase truncate">Direct Message</div>
-                                        <div className="font-bold text-base md:text-lg truncate text-background">{socialLinks.email}</div>
+                                        <div className="font-mono text-xs text-white/40 uppercase truncate">Direct Message</div>
+                                        <div className="font-bold text-base md:text-lg truncate text-primary">{socialLinks.email}</div>
                                     </div>
                                 </div>
                                 <div className="text-primary opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap ml-2">

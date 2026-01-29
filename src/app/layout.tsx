@@ -96,26 +96,16 @@ export default async function RootLayout({
           <div className="bg-grain" />
           <BackgroundBlob />
           <TopBar />
+          <div className="relative z-10 bg-background shadow-[0_20px_50px_rgba(0,0,0,0.5)] min-h-screen flex flex-col md:mb-[0] mb-0">
+            <GameModeMain>
+              {children}
+            </GameModeMain>
+            <div id="contact" className="h-px" />
+          </div>
 
-          <GameModeMain>
-            <div className="flex flex-col relative w-full overflow-x-hidden">
-              {/* Main content layer that hides the footer */}
-              <main className="relative z-10 bg-background shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex-grow w-full min-h-screen">
-                {children}
-                {/* 
-                   Scroll target for the navbar contact link. 
-                   Placed slightly above the absolute bottom so the scroll stops 
-                   perfectly where the reveal starts.
-                */}
-                <div id="contact" className="h-px w-full pointer-events-none mt-[-1px]" />
-              </main>
-
-              {/* Sticky Footer layer underneath */}
-              <div className="sticky bottom-0 -z-10 w-full bg-foreground">
-                <Footer />
-              </div>
-            </div>
-          </GameModeMain>
+          <footer className="md:sticky md:bottom-0 md:z-0 w-full bg-foreground relative z-20">
+            <Footer />
+          </footer>
 
 
           <GameModeWrapper>

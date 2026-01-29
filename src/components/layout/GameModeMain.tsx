@@ -14,10 +14,7 @@ export function GameModeMain({ children }: GameModeMainProps) {
     return (
         <main
             className={cn(
-                "flex-1 flex flex-col relative z-20 pt-16", // Always keep top padding for TopBar
-                isGameMode
-                    ? "pb-0" // No bottom padding in game mode (bottom nav hidden)
-                    : "pb-24 md:pb-32" // Normal bottom padding
+                "flex-1 flex flex-col relative pt-16" // Always keep top padding for TopBar
             )}
         >
             {children}
