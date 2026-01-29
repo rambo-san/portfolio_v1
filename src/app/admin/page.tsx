@@ -168,7 +168,7 @@ function AdminContent() {
             setSaveSuccess(true);
             setHasChanges(false);
             setTimeout(() => setSaveSuccess(false), 3000);
-        } catch (error) {
+        } catch (error: unknown) {
             console.error('Failed to save config:', error);
         } finally {
             setIsSaving(false);
@@ -302,6 +302,8 @@ function AdminContent() {
                                             <ColorsTab
                                                 colors={config.colors}
                                                 updateColors={(colors) => updateNestedConfig('colors', colors)}
+                                                theme={config.theme}
+                                                updateTheme={(theme) => updateNestedConfig('theme', theme)}
                                             />
                                         )}
                                         {activeTab === 'layout' && (
@@ -424,9 +426,9 @@ function GeneralTab({
         try {
             const url = await uploadImage(file, 'logos');
             updateConfig({ logoUrl: url });
-        } catch (error: any) {
-            console.error('Failed to upload logo:', error);
-            alert(`Failed to upload logo: ${error.message}`);
+        } catch (error: unknown) {
+            console.error('Failed to upload image:', error);
+            alert(`Failed to upload image: ${(error as Error).message}`);
         } finally {
             setIsUploading(false);
         }
@@ -505,13 +507,18 @@ function GeneralTab({
 function ColorsTab({
     colors,
     updateColors,
+    theme,
+    updateTheme,
 }: {
     colors: SiteConfig['colors'];
     updateColors: (colors: Partial<SiteConfig['colors']>) => void;
+    theme: SiteConfig['theme'];
+    updateTheme: (theme: Partial<SiteConfig['theme']>) => void;
 }) {
     const colorFields = [
         { key: 'primary', label: 'Primary Color', description: 'Main accent color' },
         { key: 'secondary', label: 'Secondary Color', description: 'Secondary accent' },
+        { key: 'accent', label: 'Accent / Highlight', description: 'Retro neons (Neo-Brutalism)' },
         { key: 'background', label: 'Background', description: 'Page background' },
         { key: 'surface', label: 'Surface', description: 'Card backgrounds' },
         { key: 'text', label: 'Text Color', description: 'Primary text' },
@@ -519,8 +526,52 @@ function ColorsTab({
     ] as const;
 
     return (
-        <div className="space-y-6">
-            <h2 className="text-xl font-bold text-white mb-4">Color Scheme</h2>
+        <div className="space-y-8">
+            <div>
+                <h2 className="text-xl font-bold text-white mb-4">Neo-Brutalist Theme</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Border Width
+                        </label>
+                        <input
+                            type="text"
+                            value={theme?.borderWidth || '2px'}
+                            onChange={(e) => updateTheme({ borderWidth: e.target.value })}
+                            placeholder="e.g., 2px"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Border Radius
+                        </label>
+                        <input
+                            type="text"
+                            value={theme?.borderRadius || '0px'}
+                            onChange={(e) => updateTheme({ borderRadius: e.target.value })}
+                            placeholder="e.g., 0px"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Box Shadow
+                        </label>
+                        <input
+                            type="text"
+                            value={theme?.boxShadow || '4px 4px 0px #000'}
+                            onChange={(e) => updateTheme({ boxShadow: e.target.value })}
+                            placeholder="e.g., 4px 4px 0px #000"
+                            className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white focus:outline-none focus:border-primary"
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <div className="h-px bg-gray-800" />
+
+            <h2 className="text-xl font-bold text-white mb-4">Color Palette</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {colorFields.map((field) => (
@@ -1012,15 +1063,15 @@ function ProjectsTab() {
     const [editingProject, setEditingProject] = useState<Project | null>(null);
     const [isAdding, setIsAdding] = useState(false);
 
-    useEffect(() => {
-        loadProjects();
-    }, []);
-
     const loadProjects = async () => {
         const fetchedProjects = await getProjects();
         setProjects(fetchedProjects);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadProjects();
+    }, []);
 
     const handleAddProject = async (project: Omit<Project, 'id'>) => {
         await addProject(project);
@@ -1271,15 +1322,15 @@ function FriendsTab() {
     const [editingFriend, setEditingFriend] = useState<Friend | null>(null);
     const [isAdding, setIsAdding] = useState(false);
 
-    useEffect(() => {
-        loadFriends();
-    }, []);
-
     const loadFriends = async () => {
         const fetchedFriends = await getFriends();
         setFriends(fetchedFriends);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadFriends();
+    }, []);
 
     const handleAddFriend = async (friend: Omit<Friend, 'id'>) => {
         await addFriend(friend);
@@ -1431,9 +1482,9 @@ function FriendForm({
         try {
             const url = await uploadImage(file, 'avatars');
             setFormData({ ...formData, avatarUrl: url });
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Failed to upload avatar:', error);
-            alert(`Failed to upload avatar: ${error.message}`);
+            alert(`Failed to upload avatar: ${(error as Error).message}`);
         } finally {
             setIsUploading(false);
         }
@@ -1582,6 +1633,11 @@ function FriendForm({
     );
 }
 
+// Known games list
+const KNOWN_GAMES = [
+    { id: 'flappy-dillu', name: 'Flappy Dillu' },
+];
+
 function GamesTab({
     settings,
     updateSettings,
@@ -1593,15 +1649,14 @@ function GamesTab({
     const [games, setGames] = useState<Array<{ id: string; name: string; stats: { totalPlays: number; uniquePlayers: number; topScore: number | null } }>>([]);
     const [loadingGames, setLoadingGames] = useState(false);
     const [expandedGame, setExpandedGame] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [gameConfigs, setGameConfigs] = useState<Record<string, any>>({});
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [savingGame, setSavingGame] = useState<string | null>(null);
     const [deletingGame, setDeletingGame] = useState<string | null>(null);
     const [uploadingImage, setUploadingImage] = useState<{ gameId: string; type: string } | null>(null);
 
-    // Known games list
-    const KNOWN_GAMES = [
-        { id: 'flappy-dillu', name: 'Flappy Dillu' },
-    ];
+
 
     // Load game stats and configs
     useEffect(() => {
@@ -1620,6 +1675,7 @@ function GamesTab({
 
                 setGames(gamesWithStats);
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const configs: Record<string, any> = {};
                 gamesWithStats.forEach(g => {
                     if (g.config) {
@@ -1639,6 +1695,7 @@ function GamesTab({
         }
     }, [activeSubTab]);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const handleSaveGameConfig = async (gameId: string, updates: any) => {
         setSavingGame(gameId);
         try {
@@ -2081,16 +2138,16 @@ function ExperienceTab() {
     const [editingExp, setEditingExp] = useState<Experience | null>(null);
     const [isAdding, setIsAdding] = useState(false);
 
-    useEffect(() => {
-        loadExperience();
-    }, []);
-
     const loadExperience = async () => {
         setLoading(true);
         const data = await getExperience();
         setExperience(data);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadExperience();
+    }, []);
 
     const handleAddExperience = async (exp: Omit<Experience, 'id'>) => {
         await addExperience(exp);
@@ -2376,16 +2433,16 @@ function AcademicTab() {
     const [editingEdu, setEditingEdu] = useState<Education | null>(null);
     const [isAdding, setIsAdding] = useState(false);
 
-    useEffect(() => {
-        loadEducation();
-    }, []);
-
     const loadEducation = async () => {
         setLoading(true);
         const data = await getEducation();
         setEducation(data);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadEducation();
+    }, []);
 
     const handleAddEducation = async (edu: Omit<Education, 'id'>) => {
         await addEducation(edu);
@@ -2636,16 +2693,16 @@ function AchievementsTab() {
     const [editingAch, setEditingAch] = useState<Achievement | null>(null);
     const [isAdding, setIsAdding] = useState(false);
 
-    useEffect(() => {
-        loadAchievements();
-    }, []);
-
     const loadAchievements = async () => {
         setLoading(true);
         const data = await getAchievements();
         setAchievements(data);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadAchievements();
+    }, []);
 
     const handleAddAchievement = async (ach: Omit<Achievement, 'id'>) => {
         await addAchievement(ach);
@@ -2897,16 +2954,16 @@ function ServicesTab() {
     const [editingServ, setEditingServ] = useState<Service | null>(null);
     const [isAdding, setIsAdding] = useState(false);
 
-    useEffect(() => {
-        loadServices();
-    }, []);
-
     const loadServices = async () => {
         setLoading(true);
         const data = await getServices();
         setServices(data);
         setLoading(false);
     };
+
+    useEffect(() => {
+        loadServices();
+    }, []);
 
     const handleAddService = async (serv: Omit<Service, 'id'>) => {
         await addService(serv);
@@ -3253,6 +3310,7 @@ function ReorderItem({
 }
 
 function UsersTab() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [updatingUid, setUpdatingUid] = useState<string | null>(null);

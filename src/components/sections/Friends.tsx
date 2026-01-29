@@ -30,85 +30,108 @@ export function Friends() {
     }
 
     return (
-        <section className="py-24 relative overflow-hidden">
-            <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section className="py-24 relative overflow-hidden crt-overlay">
+            {/* Retro Grid Background */}
+            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] z-0 pointer-events-none opacity-20" />
+            <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
+
+            <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Header */}
-                <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div className="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
                         {configLoading ? (
-                            <Skeleton className="h-10 w-64 mb-2 rounded" />
+                            <Skeleton className="h-10 w-64 mb-2 rounded bg-white/5" />
                         ) : (
-                            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-                                {friendsConfig?.title || 'Cool People I Know'}
+                            <h2 className="text-4xl md:text-5xl font-black text-white mb-2 tracking-tighter uppercase italic retro-text-shadow">
+                                {friendsConfig?.title || 'PARTY MEMBERS'}
                             </h2>
                         )}
                         {configLoading ? (
-                            <Skeleton className="h-5 w-96 rounded" />
+                            <Skeleton className="h-5 w-96 rounded bg-white/5" />
                         ) : (
-                            <p className="text-slate-400 text-lg max-w-2xl">
-                                {friendsConfig?.subtitle || "Amazing developers, designers, and creators I'm lucky to call friends."}
-                            </p>
+                            <div className="flex items-center gap-3">
+                                <div className="h-2 w-2 bg-primary animate-pulse rounded-full" />
+                                <p className="text-primary font-mono text-sm uppercase tracking-widest">
+                                    {friendsConfig?.subtitle || "Select a character to view stats"}
+                                </p>
+                            </div>
                         )}
                     </div>
 
-                    {/* Scroll hint or navigation could go here */}
-                    <div className="text-slate-500 text-sm hidden md:flex items-center gap-2">
-                        Scroll to explore <ChevronRight size={16} />
+                    <div className="hidden md:flex items-center gap-4 font-mono text-xs text-slate-500">
+                        <span className="animate-pulse">INSERT COIN</span>
+                        <div className="h-4 w-px bg-slate-800" />
+                        <span>PLAYER 1 READY</span>
                     </div>
                 </div>
 
                 {/* Horizontal Scroll Area */}
                 <div className="relative -mx-4 px-4 md:mx-0 md:px-0">
-                    {/* Fade overlay for right side indicating scroll */}
-                    <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#050505] to-transparent z-10 pointer-events-none md:hidden" />
-
-                    <div className="flex overflow-x-auto pb-8 pt-2 gap-6 snap-x snap-mandatory scrollbar-hide">
+                    <div className="flex overflow-x-auto pb-12 pt-4 gap-8 snap-x snap-mandatory scrollbar-hide">
                         {loading ? (
-                            // Loading Skeletons
                             [1, 2, 3, 4].map((i) => (
-                                <div key={i} className="flex-none w-64 md:w-72 h-80 rounded-2xl bg-white/5 animate-pulse border border-white/5" />
+                                <div key={i} className="flex-none w-72 h-[420px] rounded-sm bg-white/5 animate-pulse border-2 border-dashed border-white/10" />
                             ))
                         ) : (
-                            // Friend Cards
-                            friends.map((friend) => (
+                            friends.map((friend, idx) => (
                                 <motion.div
                                     key={friend.id}
                                     layoutId={`card-${friend.id}`}
                                     onClick={() => setSelectedFriend(friend)}
-                                    className="flex-none w-64 md:w-72 relative group cursor-pointer snap-start"
-                                    initial={{ opacity: 0, scale: 0.9 }}
-                                    whileInView={{ opacity: 1, scale: 1 }}
+                                    className="flex-none w-72 relative group cursor-pointer snap-start"
+                                    initial={{ opacity: 0, x: 50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
                                     viewport={{ once: true }}
-                                    whileHover={{ y: -5 }}
+                                    transition={{ delay: idx * 0.1 }}
                                 >
-                                    <div className="h-80 rounded-2xl bg-gradient-to-b from-white/10 to-white/5 border border-white/10 p-6 flex flex-col items-center text-center backdrop-blur-sm hover:border-primary/50 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)] transition-all duration-300">
+                                    {/* Retro Card Wrapper */}
+                                    <div className="h-[440px] relative transition-all duration-300 group-hover:-translate-y-2 group-hover:translate-x-1">
+                                        {/* Background Shadow Offset */}
+                                        <div className="absolute inset-0 bg-primary/20 translate-x-2 translate-y-2 pixel-corners -z-10 group-hover:bg-primary/40 transition-colors" />
 
-                                        {/* Avatar */}
-                                        <div className="relative w-24 h-24 mb-4">
-                                            {friend.avatarUrl ? (
-                                                <img
-                                                    src={friend.avatarUrl}
-                                                    alt={friend.name}
-                                                    className="w-full h-full rounded-full object-cover border-4 border-white/10 group-hover:border-primary transition-colors bg-[#111]"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full rounded-full bg-primary flex items-center justify-center text-white text-3xl font-bold border-4 border-white/10">
-                                                    {friend.name.charAt(0).toUpperCase()}
+                                        {/* Main Card */}
+                                        <div className="h-full bg-black border-2 border-white/20 p-6 flex flex-col items-center text-center pixel-corners group-hover:border-primary group-hover:neon-border transition-all">
+
+                                            {/* Rank/LVL Badge */}
+                                            <div className="absolute top-4 left-4 font-mono text-[10px] text-primary bg-primary/10 border border-primary/30 px-2 py-0.5">
+                                                LVL {Math.floor(Math.random() * 50) + 50}
+                                            </div>
+
+                                            {/* Avatar Area */}
+                                            <div className="relative w-32 h-32 mb-6 mt-4">
+                                                <div className="absolute inset-0 border-2 border-primary group-hover:animate-ping opacity-20" />
+                                                <div className="w-full h-full p-2 border border-white/10 bg-white/5">
+                                                    {friend.avatarUrl ? (
+                                                        <img
+                                                            src={friend.avatarUrl}
+                                                            alt={friend.name}
+                                                            className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full bg-primary/20 flex items-center justify-center text-primary text-4xl font-black">
+                                                            {friend.name.charAt(0)}
+                                                        </div>
+                                                    )}
                                                 </div>
-                                            )}
-                                        </div>
+                                            </div>
 
-                                        {/* Name & Role */}
-                                        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-primary transition-colors">
-                                            {friend.name}
-                                        </h3>
-                                        <p className="text-sm text-slate-400 line-clamp-3 mb-4 flex-1">
-                                            {friend.description}
-                                        </p>
+                                            {/* Name & Role */}
+                                            <div className="mb-4">
+                                                <h3 className="text-xl font-black text-white uppercase tracking-tighter group-hover:text-primary transition-colors">
+                                                    {friend.name}
+                                                </h3>
+                                                <div className="h-1 w-12 bg-primary mx-auto mt-1" />
+                                            </div>
 
-                                        {/* View Profile Action */}
-                                        <div className="mt-auto px-4 py-2 rounded-full bg-white/5 text-sm font-medium text-white group-hover:bg-primary transition-colors">
-                                            View Profile
+                                            <p className="text-xs font-mono text-slate-500 line-clamp-4 leading-relaxed flex-1">
+                                                {friend.description || "NO DATA AVAILABLE FOR THIS ENTITY."}
+                                            </p>
+
+                                            {/* Footer Info */}
+                                            <div className="w-full mt-6 pt-4 border-t border-white/5 flex justify-between items-center font-mono text-[10px]">
+                                                <span className="text-slate-600">CLASS: DEV</span>
+                                                <span className="text-primary group-hover:animate-pulse">CONNECT &gt;</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </motion.div>
@@ -138,50 +161,67 @@ export function Friends() {
                             animate={{ x: 0 }}
                             exit={{ x: "100%" }}
                             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                            className="fixed top-0 right-0 bottom-0 w-full md:w-[480px] bg-[#0A0A0A] border-l border-white/10 z-[51] overflow-y-auto shadow-2xl"
+                            className="fixed top-0 right-0 bottom-0 w-full md:w-[480px] bg-black border-l-4 border-primary z-[51] overflow-y-auto shadow-2xl crt-overlay"
                         >
-                            <div className="min-h-full p-8 flex flex-col">
+                            <div className="min-h-full p-8 flex flex-col relative">
+                                {/* Close Button */}
                                 <button
                                     onClick={() => setSelectedFriend(null)}
-                                    className="absolute top-6 right-6 p-2 rounded-full bg-white/5 hover:bg-white/10 text-white transition-colors"
+                                    className="absolute top-6 right-6 p-2 rounded-none bg-primary text-black hover:bg-white transition-colors z-20 font-black"
                                 >
-                                    <X size={20} />
+                                    [X]
                                 </button>
 
                                 <div className="mt-8 flex flex-col items-center text-center">
-                                    <div className="w-32 h-32 mb-6 rounded-full overflow-hidden border-4 border-violet-500/20 shadow-[0_0_40px_rgba(139,92,246,0.3)]">
+                                    {/* HUD Header */}
+                                    <div className="w-full mb-8 flex items-center gap-4">
+                                        <div className="h-px flex-1 bg-primary/30" />
+                                        <span className="font-mono text-[10px] text-primary uppercase tracking-[0.3em]">Character Data</span>
+                                        <div className="h-px flex-1 bg-primary/30" />
+                                    </div>
+
+                                    {/* Retro Avatar */}
+                                    <div className="relative w-40 h-40 mb-8 p-1 border-2 border-white/20 bg-white/5 pixel-corners">
+                                        <div className="absolute inset-0 border border-primary animate-pulse opacity-50" />
                                         {selectedFriend.avatarUrl ? (
                                             <img
                                                 src={selectedFriend.avatarUrl}
                                                 alt={selectedFriend.name}
-                                                className="w-full h-full object-cover"
+                                                className="w-full h-full object-cover grayscale brightness-125 contrast-125"
                                             />
                                         ) : (
-                                            <div className="w-full h-full bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white text-4xl font-bold">
-                                                {selectedFriend.name.charAt(0).toUpperCase()}
+                                            <div className="w-full h-full bg-primary/20 flex items-center justify-center text-white text-6xl font-black">
+                                                {selectedFriend.name.charAt(0)}
                                             </div>
                                         )}
                                     </div>
 
-                                    <h2 className="text-3xl font-bold text-white mb-2">{selectedFriend.name}</h2>
+                                    <h2 className="text-4xl font-black text-white mb-2 uppercase italic tracking-tighter retro-text-shadow">
+                                        {selectedFriend.name}
+                                    </h2>
 
                                     {selectedFriend.portfolioUrl && (
                                         <Link
                                             href={selectedFriend.portfolioUrl}
                                             target="_blank"
-                                            className="inline-flex items-center gap-2 text-violet-400 hover:text-violet-300 transition-colors mb-6"
+                                            className="inline-flex items-center gap-2 text-primary hover:text-white transition-colors mb-6 font-mono text-xs uppercase"
                                         >
-                                            <Globe size={16} />
-                                            Visit Portfolio <ExternalLink size={14} />
+                                            <Globe size={12} />
+                                            Visit_Server &gt;
                                         </Link>
                                     )}
 
-                                    <p className="text-slate-300 text-lg leading-relaxed mb-8 max-w-md">
-                                        {selectedFriend.description}
-                                    </p>
+                                    <div className="w-full text-left bg-white/5 border border-white/10 p-6 mb-8 pixel-corners relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-2 opacity-10">
+                                            <Globe size={64} />
+                                        </div>
+                                        <p className="text-slate-300 font-mono text-sm leading-relaxed relative z-10">
+                                            {selectedFriend.description || "NO BIOGRAPHY DATA FOUND IN DATABASE."}
+                                        </p>
+                                    </div>
 
                                     {/* Social Links Grid */}
-                                    <div className="w-full grid grid-cols-2 gap-3 mb-8">
+                                    <div className="w-full grid grid-cols-2 gap-4 mb-8">
                                         {Object.entries(selectedFriend.socialLinks || {}).map(([platform, url]) => {
                                             if (!url) return null;
 
@@ -199,10 +239,10 @@ export function Friends() {
                                                     key={platform}
                                                     href={url}
                                                     target="_blank"
-                                                    className="flex items-center justify-center gap-3 p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-violet-500/30 hover:shadow-[0_0_15px_rgba(139,92,246,0.1)] transition-all group"
+                                                    className="flex items-center justify-start gap-4 p-4 bg-white/5 border-l-4 border-transparent hover:border-primary hover:bg-primary/10 transition-all group"
                                                 >
-                                                    <Icon size={20} className="text-slate-400 group-hover:text-white transition-colors" />
-                                                    <span className="capitalize text-sm font-medium text-slate-300 group-hover:text-white">
+                                                    <Icon size={18} className="text-primary" />
+                                                    <span className="uppercase text-[10px] font-mono font-bold tracking-widest text-slate-400 group-hover:text-white">
                                                         {platform}
                                                     </span>
                                                 </Link>
@@ -210,15 +250,16 @@ export function Friends() {
                                         })}
                                     </div>
 
-                                    <div className="mt-auto w-full pt-8 border-t border-white/10">
-                                        <p className="text-sm text-slate-500 mb-4">
-                                            Know this person?
-                                        </p>
+                                    <div className="mt-auto w-full pt-8 border-t-2 border-dashed border-white/10">
+                                        <div className="flex justify-between items-center mb-6 font-mono text-[10px] text-slate-500">
+                                            <span>STATUS: ONLINE</span>
+                                            <span className="text-primary">SIGNAL STRENGTH: 100%</span>
+                                        </div>
                                         <button
                                             onClick={() => window.open(`mailto:?subject=Connecting with ${selectedFriend.name}&body=Hey, I saw ${selectedFriend.name} on your portfolio!`, '_blank')}
-                                            className="w-full py-3 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white font-medium hover:opacity-90 transition-opacity"
+                                            className="w-full py-4 bg-primary text-black font-black uppercase tracking-[0.2em] transform hover:scale-[1.02] active:scale-95 transition-all pixel-corners shadow-[0_0_20px_rgba(var(--primary-rgb),0.4)]"
                                         >
-                                            Connect
+                                            Send Signal
                                         </button>
                                     </div>
                                 </div>

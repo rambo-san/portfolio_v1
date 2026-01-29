@@ -27,12 +27,15 @@ export function ServicesSection({ config }: ServicesProps) {
     return (
         <section id="services" className="py-24 relative overflow-hidden">
             <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
+                <div className="mb-20">
+                    <div className="inline-block px-4 py-2 border-[length:var(--border-width)] border-foreground rounded-[radius:var(--border-radius)] font-mono text-sm font-bold uppercase tracking-widest mb-6 bg-accent text-accent-foreground shadow-[4px_4px_0px_var(--foreground)]">
+                        system.services_check()
+                    </div>
                     <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true }}
-                        className="text-4xl md:text-5xl font-bold text-white mb-4"
+                        className="text-5xl md:text-7xl font-black text-foreground uppercase tracking-tighter mb-6"
                     >
                         {config.title}
                     </motion.h2>
@@ -41,7 +44,7 @@ export function ServicesSection({ config }: ServicesProps) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ delay: 0.1 }}
-                        className="text-gray-400 max-w-2xl mx-auto text-lg"
+                        className="text-muted-foreground max-w-2xl text-xl font-medium leading-relaxed border-l-[length:var(--border-width)] border-primary pl-6"
                     >
                         {config.subtitle}
                     </motion.p>
@@ -58,7 +61,7 @@ export function ServicesSection({ config }: ServicesProps) {
 }
 
 function ServiceCard({ service, index }: { service: Service; index: number }) {
-    // Dynamic icon selection
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const IconComponent = (LucideIcons as any)[service.icon] || LucideIcons.HelpCircle;
 
     return (
@@ -67,28 +70,27 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="group p-8 rounded-3xl bg-white/5 border border-white/10 hover:border-primary/50 transition-all duration-300 relative overflow-hidden"
+            className="group retro-card bg-card p-0 overflow-hidden border-foreground hover:shadow-[10px_10px_0px_var(--foreground)] transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px]"
         >
-            {/* Hover effect background */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[50px] rounded-full translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="border-b-[length:var(--border-width)] border-foreground p-3 bg-muted/50 flex justify-between items-center group-hover:bg-primary/20 transition-colors">
+                <div className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+                    SVC_0{index + 1}
+                </div>
+                <LucideIcons.ArrowUpRight size={18} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+            </div>
 
-            <div className="relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-lg shadow-primary/5">
-                    <IconComponent size={28} />
+            <div className="p-8">
+                <div className="w-16 h-16 rounded-[radius:var(--border-radius)] border-[length:var(--border-width)] border-foreground bg-background flex items-center justify-center text-foreground mb-6 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-[4px_4px_0px_var(--foreground)] transition-all duration-300">
+                    <IconComponent size={32} strokeWidth={1.5} />
                 </div>
 
-                <h3 className="text-2xl font-bold text-white mb-4 group-hover:text-primary transition-colors">
+                <h3 className="text-2xl font-black uppercase text-foreground mb-4 group-hover:text-primary transition-colors">
                     {service.title}
                 </h3>
 
-                <p className="text-gray-400 leading-relaxed group-hover:text-gray-300 transition-colors">
+                <p className="text-muted-foreground leading-relaxed text-lg group-hover:text-foreground transition-colors">
                     {service.description}
                 </p>
-
-                <div className="mt-8 flex items-center gap-2 text-primary font-bold text-sm opacity-0 group-hover:opacity-100 translate-x-[-10px] group-hover:translate-x-0 transition-all">
-                    <span>Learn More</span>
-                    <LucideIcons.ArrowRight size={16} />
-                </div>
             </div>
         </motion.div>
     );

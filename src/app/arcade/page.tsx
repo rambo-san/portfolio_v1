@@ -87,41 +87,58 @@ export default function Arcade() {
 
     return (
         <>
-            <div className="min-h-screen pt-12 pb-12 px-4">
-                <div className="container mx-auto">
-                    <header className="mb-16 text-center">
+            <div className="min-h-screen pt-12 pb-12 px-4 crt-overlay bg-[#050505]">
+                {/* Vintage Grid Overlay */}
+                <div className="fixed inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-0 pointer-events-none" />
+
+                <div className="container mx-auto relative z-10">
+                    <header className="mb-16 text-center pt-8">
+                        <div className="flex justify-between items-center mb-12 font-mono text-[10px] text-primary/60 tracking-[0.3em] uppercase">
+                            <span>Credit: 01</span>
+                            <div className="flex items-center gap-4">
+                                <span className="animate-pulse text-white">Insert Coin</span>
+                                <div className="h-4 w-px bg-white/20" />
+                                <span>P1: 000000</span>
+                            </div>
+                        </div>
+
                         <motion.div
                             initial={{ scale: 0.9, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
-                            className="inline-flex items-center justify-center p-6 rounded-full bg-primary/10 mb-8 border border-primary/20 shadow-[0_0_50px_rgba(var(--primary-rgb),0.2)]"
+                            className="inline-flex items-center justify-center p-8 bg-black border-4 border-primary shadow-[0_0_30px_rgba(var(--primary-rgb),0.5)] mb-8 pixel-corners"
                         >
-                            <Gamepad2 size={64} className="text-primary" />
+                            <Gamepad2 size={64} className="text-primary animate-pulse" />
                         </motion.div>
-                        <h1 className="text-4xl md:text-6xl font-black bg-clip-text text-transparent bg-gradient-to-r from-primary via-white to-primary/80 mb-6">
-                            Engineering Arcade
+
+                        <h1 className="text-5xl md:text-8xl font-black text-white mb-6 uppercase italic tracking-tighter retro-text-shadow">
+                            SYSTEM ARCADE
                         </h1>
-                        <p className="text-slate-400 max-w-2xl mx-auto text-lg">
-                            Test your reflexes and problem-solving skills. These simulations demonstrate distinct engineering skills: rendering, state management, and algorithmic thinking.
-                        </p>
+
+                        <div className="flex items-center justify-center gap-4 mb-8">
+                            <div className="h-0.5 w-12 bg-primary" />
+                            <p className="text-primary font-mono text-sm uppercase tracking-[0.4em]">
+                                Initialization Sequence Complete
+                            </p>
+                            <div className="h-0.5 w-12 bg-primary" />
+                        </div>
 
                         {/* Player Status */}
                         {!loading && (user || (hasGuestName && allowGuestPlay)) && (
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10"
+                                className="mt-6 inline-flex items-center gap-4 px-6 py-3 bg-white/5 border-2 border-primary/20 pixel-corners"
                             >
-                                <User size={16} className="text-primary" />
-                                <span className="text-white">
-                                    Playing as <span className="font-semibold text-primary">{displayName}</span>
+                                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                                <span className="text-white font-mono text-xs uppercase tracking-widest">
+                                    Operator: <span className="text-primary font-black">{displayName}</span>
                                 </span>
                                 {!user && (
                                     <button
                                         onClick={() => setShowAuthModal(true)}
-                                        className="ml-2 text-xs text-gray-400 hover:text-primary transition-colors flex items-center gap-1"
+                                        className="ml-4 text-[10px] font-mono text-gray-400 hover:text-primary transition-colors flex items-center gap-2 underline underline-offset-4"
                                     >
-                                        <LogIn size={12} />
-                                        Sign in to save scores
+                                        [Save_Profile]
                                     </button>
                                 )}
                             </motion.div>
@@ -222,7 +239,7 @@ export default function Arcade() {
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
+                            className="grid md:grid-cols-2 lg:grid-cols-3 gap-12"
                         >
                             {games.map((game, i) => (
                                 <motion.div
@@ -230,89 +247,116 @@ export default function Arcade() {
                                     initial={{ y: 20, opacity: 0 }}
                                     animate={{ y: 0, opacity: 1 }}
                                     transition={{ delay: i * 0.1 }}
-                                    className={`rounded-3xl bg-white/5 border border-white/10 p-8 flex flex-col ${game.status !== "Active" ? "opacity-50 grayscale" : "hover:bg-white/10 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(var(--primary-rgb),0.15)]"} transition-all duration-300 group overflow-hidden relative`}
+                                    className={`relative group ${game.status !== "Active" ? "opacity-40 grayscale" : ""}`}
                                 >
-                                    {/* RBAC Lockdown Check */}
+                                    {/* Cabinet Shadow/Offset */}
+                                    <div className="absolute inset-0 bg-primary/20 translate-x-3 translate-y-3 pixel-corners -z-10 group-hover:bg-primary/30 transition-all" />
+
+                                    {/* Cabinet Body */}
+                                    <div className={`h-full bg-black border-2 border-white/20 p-8 flex flex-col pixel-corners transition-all duration-300 ${game.status === "Active" ? "group-hover:border-primary group-hover:neon-border group-hover:-translate-y-1 group-hover:translate-x-1" : ""}`}>
+
+                                        {/* Status Bar */}
+                                        <div className="flex justify-between items-center mb-8">
+                                            <div className="flex gap-1">
+                                                <div className="w-1.5 h-1.5 bg-red-500 rounded-full" />
+                                                <div className="w-1.5 h-1.5 bg-yellow-500 rounded-full" />
+                                                <div className="w-1.5 h-1.5 bg-green-500 rounded-full" />
+                                            </div>
+                                            <div className={`font-mono text-[10px] uppercase tracking-widest px-2 py-1 border ${game.difficulty === "Hard" ? "border-red-500/50 text-red-500" : "border-primary/50 text-primary"}`}>
+                                                {game.difficulty}
+                                            </div>
+                                        </div>
+
+                                        {/* Icon Wrapper */}
+                                        <div className="w-16 h-16 bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:bg-primary/20 transition-colors">
+                                            {game.icon ? <game.icon size={32} className="text-white group-hover:text-primary" /> : <Gamepad2 size={32} className="text-white group-hover:text-primary" />}
+                                        </div>
+
+                                        <h3 className="text-2xl font-black text-white mb-3 uppercase tracking-tighter group-hover:text-primary transition-colors">
+                                            {game.title}
+                                        </h3>
+
+                                        <p className="text-xs font-mono text-slate-500 mb-8 flex-1 leading-relaxed">
+                                            {game.description}
+                                        </p>
+
+                                        <div className="mt-auto">
+                                            {game.status === "Active" ? (
+                                                <Link href={`/arcade/${game.id}`} className="block">
+                                                    <button className="w-full py-4 bg-primary text-black font-black uppercase tracking-[0.2em] transform hover:bg-white transition-all pixel-corners shadow-[0_0_15px_rgba(var(--primary-rgb),0.3)] group-active:scale-95">
+                                                        START_SYSTEM
+                                                    </button>
+                                                </Link>
+                                            ) : (
+                                                <button disabled className="w-full py-4 bg-white/5 text-slate-600 font-black uppercase tracking-[0.2em] cursor-not-allowed border-2 border-dashed border-white/10 pixel-corners">
+                                                    LOCKED
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* RBAC Lockdown Check - Styled more like a 'Service Error' */}
                                     {(() => {
                                         const config = gameConfigs[game.id];
                                         if (!config) return null;
 
                                         const userRole = profile?.role || 'guest';
-                                        const allowedRoles = config.allowedRoles || ['player', 'admin']; // Default
+                                        const allowedRoles = config.allowedRoles || ['player', 'admin'];
                                         const isAllowed = allowedRoles.includes(userRole) || userRole === 'admin';
 
                                         if (!isAllowed) {
                                             return (
-                                                <div className="absolute inset-0 z-20 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center p-6 text-center">
-                                                    <div className="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mb-4">
-                                                        <Lock className="text-red-500" size={32} />
+                                                <div className="absolute inset-0 z-20 bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-8 text-center pixel-corners border-4 border-red-500/50 crt-flicker">
+                                                    <Lock className="text-red-500 mb-4" size={48} />
+                                                    <h4 className="text-xl font-black text-white mb-2 uppercase tracking-tighter">ACCESS_DENIED</h4>
+                                                    <p className="text-[10px] font-mono text-red-400 mb-4 uppercase leading-tight">
+                                                        Incompatible credentials for this simulation. <br />
+                                                        Requires: {allowedRoles.join(', ')}
+                                                    </p>
+                                                    <div className="font-mono text-[9px] text-white/40 uppercase">
+                                                        ID: {userRole} // VERIFICATION_FAILED
                                                     </div>
-                                                    <h4 className="text-xl font-bold text-white mb-2">Access Restricted</h4>
-                                                    <p className="text-gray-400 text-sm mb-4">
-                                                        This game is only available for: <br />
-                                                        <span className="text-primary font-medium">{allowedRoles.join(', ')}</span>
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        Your current role: <span className="capitalize">{userRole}</span>
-                                                    </p>
                                                 </div>
                                             );
                                         }
                                         return null;
                                     })()}
-
-                                    <div className="flex justify-between items-start mb-6">
-                                        <div
-                                            className={`px-3 py-1 rounded-full text-xs font-mono border ${game.difficulty === "Hard"
-                                                ? "border-red-500/50 text-red-400 bg-red-500/10"
-                                                : game.difficulty === "Medium"
-                                                    ? "border-orange-500/50 text-orange-400 bg-orange-500/10"
-                                                    : "border-green-500/50 text-green-400 bg-green-500/10"
-                                                }`}
-                                        >
-                                            {game.difficulty}
-                                        </div>
-                                        {game.status === "Active" && <Flame className="text-primary animate-pulse" size={24} />}
-                                    </div>
-
-                                    <h3 className="text-2xl font-bold mb-3 text-white group-hover:text-primary transition-colors">{game.title}</h3>
-                                    <p className="text-slate-400 text-sm mb-8 flex-1 leading-relaxed">{game.description}</p>
-
-                                    <div className="mt-auto">
-                                        {game.status === "Active" ? (
-                                            <Link href={`/arcade/${game.id}`} className="block">
-                                                <Button className="w-full py-6 text-lg font-bold">
-                                                    PLAY NOW
-                                                </Button>
-                                            </Link>
-                                        ) : (
-                                            <Button disabled variant="outline" className="w-full py-6 text-lg font-bold opacity-50">
-                                                COMING SOON
-                                            </Button>
-                                        )}
-                                    </div>
                                 </motion.div>
                             ))}
 
-                            {/* Leaderboard Teaser */}
+                            {/* Leaderboard Teaser - Styled like an 8-bit monitor */}
                             {showLeaderboard && (
-                                <div className="rounded-3xl bg-gradient-to-br from-primary/10 to-black border border-primary/20 p-8 flex flex-col justify-center items-center text-center relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-primary/5 animate-pulse rounded-3xl" />
-                                    <Trophy size={56} className="text-yellow-500 mb-6 relative z-10 drop-shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
-                                    <h3 className="text-xl font-bold mb-2 relative z-10">Global Leaderboard</h3>
-                                    <p className="text-slate-400 text-sm mb-6 relative z-10">Compete with other players for the high score.</p>
-                                    <div className="w-full bg-black/40 border border-white/5 rounded-xl p-4 relative z-10 backdrop-blur-sm">
-                                        <div className="flex justify-between text-xs text-slate-500 mb-3 tracking-widest">
-                                            <span>RANK</span>
-                                            <span>SCORE</span>
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-yellow-500/10 translate-x-3 translate-y-3 pixel-corners -z-10" />
+                                    <div className="h-full bg-black border-2 border-yellow-500/30 p-8 flex flex-col pixel-corners">
+                                        <div className="flex items-center gap-3 mb-6">
+                                            <Trophy size={20} className="text-yellow-500" />
+                                            <h3 className="text-xl font-black text-white uppercase tracking-tighter">HIGH SCORES</h3>
                                         </div>
-                                        <div className="flex justify-between text-sm font-mono text-white mb-2 border-b border-white/5 pb-2">
-                                            <span>1. ALX_99</span>
-                                            <span className="text-primary">99,420</span>
+
+                                        <div className="space-y-4 font-mono text-xs mb-6">
+                                            <div className="flex justify-between text-yellow-500/50 border-b border-white/10 pb-1">
+                                                <span>OPERATOR</span>
+                                                <span>POINTS</span>
+                                            </div>
+                                            <div className="flex justify-between text-white border-b border-white/5 pb-2">
+                                                <span className="flex gap-2"><span className="text-yellow-500">1ST</span> ALX_99</span>
+                                                <span className="text-primary font-bold">99,420</span>
+                                            </div>
+                                            <div className="flex justify-between text-white/70 border-b border-white/5 pb-2">
+                                                <span className="flex gap-2"><span className="text-slate-500">2ND</span> DEV_OPS</span>
+                                                <span className="text-primary/70">88,100</span>
+                                            </div>
+                                            <div className="flex justify-between text-white/50">
+                                                <span className="flex gap-2"><span className="text-slate-700">3RD</span> NULL_PT</span>
+                                                <span className="text-primary/50">72,500</span>
+                                            </div>
                                         </div>
-                                        <div className="flex justify-between text-sm font-mono text-white/60">
-                                            <span>2. DEV_OPS</span>
-                                            <span className="text-primary">88,100</span>
+
+                                        <div className="mt-auto pt-4 border-t border-white/10 text-center">
+                                            <span className="font-mono text-[9px] text-slate-500 animate-pulse tracking-widest uppercase items-center flex justify-center gap-2">
+                                                <div className="w-1 h-1 bg-yellow-500" /> Connecting to Global_Net <div className="w-1 h-1 bg-yellow-500" />
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

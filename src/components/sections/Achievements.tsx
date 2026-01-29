@@ -25,39 +25,33 @@ export function AchievementsSection({ config }: AchievementsProps) {
     if (loading || achievements.length === 0) return null;
 
     return (
-        <section id="achievements" className="py-24 relative overflow-hidden">
+        <section id="achievements" className="py-24 relative overflow-hidden bg-background">
             <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-16">
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        whileInView={{ opacity: 1, scale: 1 }}
-                        viewport={{ once: true }}
-                        className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-sm font-bold uppercase tracking-widest mb-6"
-                    >
-                        <Trophy size={16} />
-                        Milestones & Recognition
-                    </motion.div>
+                <div className="mb-20">
+                    <div className="inline-block px-4 py-2 bg-yellow-400 text-black border-[length:var(--border-width)] border-foreground rounded-[radius:var(--border-radius)] font-mono text-sm font-bold uppercase tracking-widest mb-6 shadow-[4px_4px_0px_var(--foreground)] transform rotate-1">
+                        <Trophy size={16} className="inline mr-2" />
+                        Hall_of_Fame
+                    </div>
                     <motion.h2
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: -50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        transition={{ delay: 0.1 }}
-                        className="text-4xl md:text-6xl font-black text-white mb-6 uppercase tracking-tighter"
+                        className="text-5xl md:text-7xl font-black text-foreground uppercase tracking-tighter mb-4"
                     >
                         {config.title}
                     </motion.h2>
                     <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
+                        initial={{ opacity: 0, x: -50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="text-gray-400 max-w-2xl mx-auto text-lg italic"
+                        transition={{ delay: 0.1 }}
+                        className="text-muted-foreground text-xl italic font-serif border-l-4 border-yellow-400 pl-6"
                     >
                         "{config.subtitle}"
                     </motion.p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {achievements.map((ach, index) => (
                         <AchievementCard key={ach.id} ach={ach} index={index} />
                     ))}
@@ -70,67 +64,62 @@ export function AchievementsSection({ config }: AchievementsProps) {
 function AchievementCard({ ach, index }: { ach: Achievement; index: number }) {
     return (
         <motion.div
-            initial={{ opacity: 0, rotateY: 20, y: 20 }}
-            whileInView={{ opacity: 1, rotateY: 0, y: 0 }}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: index * 0.1 }}
-            style={{ perspective: 1000 }}
-            className="group"
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+            className="group h-full"
         >
-            <div className="relative h-full bg-gray-900/50 backdrop-blur-md border border-gray-800 rounded-2xl p-6 overflow-hidden transition-all duration-500 hover:border-yellow-500/50 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.4)]">
-                {/* Background Pattern */}
-                <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
-                    <Medal size={120} />
-                </div>
-
-                <div className="flex flex-col h-full">
-                    {ach.imageUrl && (
-                        <div className="relative aspect-video mb-6 rounded-xl overflow-hidden border border-gray-800 group-hover:border-yellow-500/30 transition-colors">
-                            <img
-                                src={ach.imageUrl}
-                                alt={ach.title}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent opacity-60" />
+            <div className="retro-card bg-card p-0 overflow-hidden border-foreground h-full flex flex-col hover:shadow-[10px_10px_0px_rgba(250,204,21,1)] hover:border-yellow-500 transition-all duration-300">
+                {ach.imageUrl && (
+                    <div className="relative aspect-video border-b-[length:var(--border-width)] border-foreground overflow-hidden">
+                        <img
+                            src={ach.imageUrl}
+                            alt={ach.title}
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 grayscale group-hover:grayscale-0"
+                        />
+                        <div className="absolute top-2 right-2 px-2 py-1 bg-yellow-400 text-black text-xs font-bold border border-black rounded uppercase tracking-wider">
+                            Verified
                         </div>
-                    )}
+                    </div>
+                )}
 
+                <div className="p-6 flex flex-col flex-1">
                     <div className="flex items-center gap-3 mb-4">
-                        <div className="p-2 rounded-lg bg-yellow-500/10 text-yellow-500">
-                            <Award size={20} />
+                        <div className="p-2 rounded-[radius:var(--border-radius)] bg-yellow-400 text-black border-[length:var(--border-width)] border-black shadow-[2px_2px_0px_black]">
+                            <Award size={20} className="stroke-[2.5px]" />
                         </div>
-                        <span className="text-gray-500 text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                        <span className="text-muted-foreground text-xs font-bold uppercase tracking-wider flex items-center gap-1 font-mono">
                             <Calendar size={12} />
                             {ach.date}
                         </span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-yellow-500 transition-colors">
+                    <h3 className="text-xl font-black text-foreground uppercase mb-1 leading-tight group-hover:text-yellow-600 transition-colors">
                         {ach.title}
                     </h3>
-                    <p className="text-primary text-sm font-medium mb-4">{ach.issuer}</p>
+                    <p className="text-primary font-bold text-sm mb-4 uppercase tracking-wide">{ach.issuer}</p>
 
                     {ach.description && (
-                        <p className="text-gray-400 text-sm leading-relaxed mb-6 line-clamp-3">
+                        <p className="text-muted-foreground text-sm leading-relaxed mb-6 pt-4 border-t-[length:var(--border-width)] border-dashed border-foreground/20">
                             {ach.description}
                         </p>
                     )}
 
-                    <div className="mt-auto pt-4 border-t border-gray-800 flex justify-between items-center">
+                    <div className="mt-auto">
                         {ach.link ? (
                             <a
                                 href={ach.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-2 text-sm font-bold text-white hover:text-yellow-500 transition-colors"
+                                className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-foreground hover:text-yellow-600 transition-colors group/link"
                             >
                                 Verify Credential
-                                <ExternalLink size={14} />
+                                <ExternalLink size={12} className="group-hover/link:translate-x-1 transition-transform" />
                             </a>
                         ) : (
-                            <span className="text-xs text-gray-600 font-medium">Internal Recognition</span>
+                            <span className="text-xs text-muted-foreground font-bold uppercase tracking-widest opacity-50 cursor-not-allowed">Internal Recognition</span>
                         )}
-                        <Medal size={20} className="text-gray-800 group-hover:text-yellow-500/20 transition-colors" />
                     </div>
                 </div>
             </div>

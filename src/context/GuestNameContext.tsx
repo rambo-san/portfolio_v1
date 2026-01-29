@@ -21,6 +21,7 @@ export function GuestNameProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
+            // eslint-disable-next-line
             setGuestNameState(saved);
         }
         setIsLoaded(true);

@@ -13,7 +13,6 @@ import {
     serverTimestamp,
     Timestamp,
     DocumentData,
-    QueryConstraint,
 } from 'firebase/firestore';
 import { db } from './config';
 
@@ -341,7 +340,7 @@ export async function saveGameConfig(gameId: string, config: Partial<Omit<GameCo
 /**
  * Get all users from Firestore (admin only)
  */
-export async function getAllUsers(): Promise<any[]> {
+export async function getAllUsers(): Promise<Array<DocumentData & { uid: string }>> {
     const usersRef = collection(db, 'users');
     const snapshot = await getDocs(usersRef);
     return snapshot.docs.map(doc => ({

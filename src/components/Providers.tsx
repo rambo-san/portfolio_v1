@@ -5,6 +5,7 @@ import { SiteConfigProvider } from '@/context/SiteConfigContext';
 import { GuestNameProvider } from '@/context/GuestNameContext';
 import { GameModeProvider } from '@/context/GameModeContext';
 
+import { TorchProvider } from '@/context/TorchContext';
 import { ThemeInitializer } from '@/components/ThemeInitializer';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -13,7 +14,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
             <SiteConfigProvider>
                 <ThemeInitializer />
                 <GuestNameProvider>
-                    <GameModeProvider>{children}</GameModeProvider>
+                    <GameModeProvider>
+                        <TorchProvider>
+                            {children}
+                        </TorchProvider>
+                    </GameModeProvider>
                 </GuestNameProvider>
             </SiteConfigProvider>
         </AuthProvider>

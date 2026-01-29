@@ -87,6 +87,14 @@ export interface SiteConfig {
         surface: string;       // Card/surface background
         text: string;          // Primary text color
         textMuted: string;     // Muted/secondary text
+        accent: string;        // Vibrant accent color (Neo-Brutalism)
+    };
+
+    // Theme Customization (Neo-Brutalism / Retro)
+    theme: {
+        borderWidth: string;   // e.g., "2px", "4px"
+        borderRadius: string;  // e.g., "0px", "8px"
+        boxShadow: string;     // e.g., "4px 4px 0px #000"
     };
 
     // Hero Section
@@ -191,6 +199,13 @@ export const defaultConfig: SiteConfig = {
         surface: '#111111',      // Dark gray
         text: '#e5e5e5',         // Light gray
         textMuted: '#737373',    // Muted gray
+        accent: '#BC13FE',       // Cyber Purple
+    },
+
+    theme: {
+        borderWidth: '2px',
+        borderRadius: '0px',     // Sharp corners for brutalist look
+        boxShadow: '4px 4px 0px #000000', // Hard shadow
     },
 
     hero: {

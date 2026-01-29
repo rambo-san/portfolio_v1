@@ -41,6 +41,8 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
+import { TorchOverlay } from "@/components/layout/TorchOverlay";
+
 export default async function RootLayout({
   children,
 }: Readonly<{
@@ -70,9 +72,15 @@ export default async function RootLayout({
             --primary: ${config.colors.primary};
             --primary-rgb: ${primaryRgb};
             --secondary: ${config.colors.secondary};
+            --accent: ${config.colors.accent};
             --card: ${config.colors.surface};
             --text-muted: ${config.colors.textMuted};
-            --border: rgb(${primaryRgb} / 0.15);
+            --border: ${config.colors.text}; /* Default high contrast border */
+            
+            /* Neo-Brutalist Theme Variables */
+            --border-width: ${config.theme.borderWidth};
+            --border-radius: ${config.theme.borderRadius};
+            --box-shadow: ${config.theme.boxShadow};
           }
           html {
             background-color: ${config.colors.background};
@@ -84,14 +92,32 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
       >
         <Providers>
+          <TorchOverlay />
+          <div className="bg-grain" />
           <BackgroundBlob />
           <TopBar />
 
           <GameModeMain>
-            {children}
+            <div className="flex flex-col relative w-full overflow-x-hidden">
+              {/* Main content layer that hides the footer */}
+              <main className="relative z-10 bg-background shadow-[0_20px_50px_rgba(0,0,0,0.5)] flex-grow w-full min-h-screen">
+                {children}
+                {/* 
+                   Scroll target for the navbar contact link. 
+                   Placed slightly above the absolute bottom so the scroll stops 
+                   perfectly where the reveal starts.
+                */}
+                <div id="contact" className="h-px w-full pointer-events-none mt-[-1px]" />
+              </main>
+
+              {/* Sticky Footer layer underneath */}
+              <div className="sticky bottom-0 -z-10 w-full bg-foreground">
+                <Footer />
+              </div>
+            </div>
           </GameModeMain>
 
-          <Footer />
+
           <GameModeWrapper>
             <Navbar />
             <FriendsDrawer />

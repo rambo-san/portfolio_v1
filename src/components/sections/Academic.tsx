@@ -26,9 +26,9 @@ export function AcademicSection({ config }: AcademicProps) {
     if (loading || education.length === 0) return null;
 
     return (
-        <section id="academic" className="py-24 bg-black/20 relative overflow-hidden">
+        <section id="academic" className="py-24 bg-background relative overflow-hidden">
             <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
+                <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-6 border-b-[length:var(--border-width)] border-foreground pb-8">
                     <div className="max-w-2xl">
                         <motion.div
                             initial={{ opacity: 0, x: -20 }}
@@ -44,23 +44,14 @@ export function AcademicSection({ config }: AcademicProps) {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ delay: 0.1 }}
-                            className="text-4xl md:text-5xl font-bold text-white"
+                            className="text-5xl md:text-7xl font-black text-foreground uppercase tracking-tighter"
                         >
                             {config.title}
                         </motion.h2>
                     </div>
-                    <motion.p
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ delay: 0.2 }}
-                        className="text-gray-400 text-lg md:text-right"
-                    >
-                        {config.subtitle}
-                    </motion.p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                     {education.map((edu, index) => (
                         <AcademicCard key={edu.id} edu={edu} index={index} />
                     ))}
@@ -77,55 +68,60 @@ function AcademicCard({ edu, index }: { edu: Education; index: number }) {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="group relative"
+            className="group relative h-full"
         >
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition duration-500" />
-
-            <div className="relative h-full p-8 rounded-2xl bg-gray-900 border border-gray-800 hover:border-primary/50 transition-colors duration-300">
-                <div className="flex justify-between items-start mb-6">
-                    <div className="p-3 rounded-xl bg-primary/10 text-primary border border-primary/20 group-hover:bg-primary group-hover:text-white transition-all duration-300">
-                        <GraduationCap size={24} />
+            <div className="retro-card bg-card p-0 overflow-hidden border-foreground h-full flex flex-col hover:shadow-[10px_10px_0px_var(--foreground)] transition-shadow duration-300">
+                {/* Header Bar */}
+                <div className="border-b-[length:var(--border-width)] border-foreground p-3 bg-muted/50 flex justify-between items-center">
+                    <div className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                        <GraduationCap size={14} /> ACCOUNT_EDU_0{index + 1}
                     </div>
-                    {edu.link && (
-                        <a
-                            href={edu.link}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="p-2 rounded-lg bg-white/5 text-gray-400 hover:text-primary hover:bg-white/10 transition-all"
-                        >
-                            <ExternalLink size={18} />
-                        </a>
-                    )}
+                    <div className="w-2 h-2 bg-foreground rounded-full" />
                 </div>
 
-                <div className="space-y-4">
-                    <div>
-                        <div className="flex items-center gap-2 text-primary font-medium text-sm mb-2">
-                            <Calendar size={14} />
-                            {formatDate(edu.startDate)} — {edu.isCurrent ? 'Present' : (edu.endDate ? formatDate(edu.endDate) : 'Present')}
-                            <span className="ml-1 text-gray-500 lowercase font-medium">
-                                {formatDuration(edu.startDate, edu.endDate, edu.isCurrent)}
-                            </span>
+                <div className="p-8 flex flex-col flex-1">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="p-3 rounded-[radius:var(--border-radius)] bg-primary/10 text-primary border-[length:var(--border-width)] border-primary/20 group-hover:bg-primary group-hover:text-primary-foreground group-hover:border-foreground transition-all duration-300 shadow-[4px_4px_0px_var(--foreground)]">
+                            <GraduationCap size={28} strokeWidth={1.5} />
                         </div>
-                        <h3 className="text-2xl font-bold text-white group-hover:text-primary transition-colors">
-                            {edu.degree}
-                            {edu.score && (
-                                <span className="ml-3 text-lg font-medium text-primary/80">
-                                    — {edu.score}
-                                </span>
-                            )}
-                        </h3>
-                        <div className="flex items-center gap-2 text-gray-400 mt-1">
-                            <MapPin size={14} className="text-primary/70" />
-                            {edu.institution}
-                        </div>
+                        {edu.link && (
+                            <a
+                                href={edu.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 border-[length:var(--border-width)] border-foreground rounded-[radius:var(--border-radius)] hover:bg-foreground hover:text-background transition-colors"
+                            >
+                                <ExternalLink size={18} />
+                            </a>
+                        )}
                     </div>
 
-                    {edu.description && (
-                        <p className="text-gray-500 leading-relaxed pt-4 border-t border-gray-800/50">
-                            {edu.description}
-                        </p>
-                    )}
+                    <div className="space-y-4 flex-1">
+                        <div>
+                            <div className="flex items-center gap-2 text-primary font-bold text-sm mb-2 uppercase tracking-wide">
+                                <Calendar size={14} />
+                                {formatDate(edu.startDate)} — {edu.isCurrent ? 'Present' : (edu.endDate ? formatDate(edu.endDate) : 'Present')}
+                            </div>
+                            <h3 className="text-2xl font-black text-foreground uppercase leading-tight mb-2">
+                                {edu.degree}
+                            </h3>
+                            {edu.score && (
+                                <div className="inline-block px-2 py-1 bg-muted font-mono text-xs font-bold border-[length:var(--border-width)] border-foreground/30 rounded-[radius:var(--border-radius)] mb-2">
+                                    GRADE: {edu.score}
+                                </div>
+                            )}
+                            <div className="flex items-center gap-2 text-muted-foreground font-bold text-lg mt-1">
+                                <MapPin size={16} />
+                                {edu.institution}
+                            </div>
+                        </div>
+
+                        {edu.description && (
+                            <p className="text-muted-foreground/80 leading-relaxed pt-6 border-t-[length:var(--border-width)] border-dashed border-foreground/20 mt-auto">
+                                {edu.description}
+                            </p>
+                        )}
+                    </div>
                 </div>
             </div>
         </motion.div>
