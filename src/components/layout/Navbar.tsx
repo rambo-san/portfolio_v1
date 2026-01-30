@@ -98,10 +98,13 @@ const SECTION_MAP: Record<string, { name: string; icon: any; href: string }> = {
     academic: { name: "Education", icon: GraduationCap, href: "/#academic" },
     achievements: { name: "Awards", icon: Trophy, href: "/#achievements" },
     contact: { name: "Contact", icon: Mail, href: "/#contact" },
+    arcade: { name: "Arcade", icon: Gamepad2, href: "/arcade" },
 };
 
 export function Navbar() {
     const pathname = usePathname();
+    const isAdmin = pathname?.startsWith('/admin');
+    if (isAdmin) return null;
     const { config } = useSiteConfig();
     const mouseX = useMotionValue(Infinity);
 
@@ -115,11 +118,20 @@ export function Navbar() {
         sectionOrder.push('contact');
     }
 
-    const navItems = [
-        ...sectionOrder
-            .map(id => ({ ...SECTION_MAP[id], id }))
-            .filter(item => item && item.name),
-    ];
+    const navItems = sectionOrder
+        .map(id => ({ ...SECTION_MAP[id], id }))
+        .filter(item => item && item.name);
+
+    // Always ensure Arcade is in the nav if not hidden
+    if (!hiddenSections.includes('arcade') && !navItems.find(item => item.id === 'arcade')) {
+        const contactIndex = navItems.findIndex(item => item.id === 'contact');
+        const arcadeItem = { ...SECTION_MAP.arcade, id: 'arcade' };
+        if (contactIndex !== -1) {
+            navItems.splice(contactIndex, 0, arcadeItem);
+        } else {
+            navItems.push(arcadeItem);
+        }
+    }
 
     // Active State Logic
     const [activeId, setActiveId] = useState("hero");
@@ -127,12 +139,11 @@ export function Navbar() {
 
     useEffect(() => {
         if (pathname === "/arcade") {
-            setActiveId("arcade-page");
+            setActiveId("arcade");
         } else if (pathname === "/") {
-            if (typeof window !== 'undefined' && window.location.hash) {
-                const hash = window.location.hash.substring(1);
+            const hash = typeof window !== 'undefined' ? window.location.hash.substring(1) : "";
+            if (hash && document.getElementById(hash)) {
                 setActiveId(hash);
-                // Lock scroll spy briefly
                 isManualRef.current = true;
                 setTimeout(() => { isManualRef.current = false; }, 1000);
             } else {
@@ -141,7 +152,7 @@ export function Navbar() {
         }
     }, [pathname]);
 
-    // Scroll Spy
+    // Scroll Spy - More robust version
     useEffect(() => {
         if (pathname !== "/") return;
 
@@ -152,30 +163,47 @@ export function Navbar() {
                 .filter(item => item.href.startsWith("/#") || item.href === "/")
                 .map(item => item.id);
 
-            let current = "hero";
             const scrollY = window.scrollY;
-            const checkPoint = scrollY + (window.innerHeight * 0.4);
+            const viewportHeight = window.innerHeight;
+            const scrollBottom = scrollY + viewportHeight;
+            const middlePoint = scrollY + (viewportHeight * 0.5);
 
-            for (const sectionId of sections) {
-                if (!sectionId) continue;
-                if (sectionId === 'hero') {
-                    if (scrollY < 300) { current = 'hero'; break; }
-                    continue;
+            // Special case: At the very top
+            if (scrollY < 100) {
+                setActiveId("hero");
+                return;
+            }
+
+            // Special case: Near bottom (usually contact/footer)
+            if (scrollBottom > document.documentElement.scrollHeight - 100) {
+                if (sections.includes("contact")) {
+                    setActiveId("contact");
+                    return;
                 }
+            }
+
+            // Standard Spy: Check from bottom to top to find the "current" section
+            let found = "hero";
+            // Important: reverse the order so we find the deepest visible section first
+            const sortedSections = [...sections].reverse();
+
+            for (const sectionId of sortedSections) {
+                if (sectionId === "hero") continue;
                 const element = document.getElementById(sectionId);
                 if (element) {
-                    const { offsetTop, offsetHeight } = element;
-                    if (checkPoint >= offsetTop && checkPoint < offsetTop + offsetHeight) {
-                        current = sectionId;
+                    const top = element.offsetTop;
+                    // If the middle of the screen is past the top of the section, it's active
+                    if (middlePoint >= top) {
+                        found = sectionId;
+                        break;
                     }
                 }
             }
-            setActiveId(current);
+            setActiveId(found);
         };
 
         window.addEventListener("scroll", handleScroll, { passive: true });
-        // Delay initial check to allow layout to settle
-        const timer = setTimeout(handleScroll, 200);
+        const timer = setTimeout(handleScroll, 100);
         return () => {
             window.removeEventListener("scroll", handleScroll);
             clearTimeout(timer);

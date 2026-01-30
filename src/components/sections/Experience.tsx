@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Briefcase, Calendar, ExternalLink, ChevronRight } from 'lucide-react';
 import { Experience, getExperience, SiteConfig } from '@/lib/firebase/siteConfig';
 import { formatDate, formatDuration } from '@/lib/utils';
+import { MouseParallax } from '@/components/ui/MouseParallax';
 
 interface ExperienceProps {
     config: SiteConfig['experience'];

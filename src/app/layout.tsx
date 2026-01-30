@@ -1,15 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { Navbar } from "@/components/layout/Navbar";
-import { Footer } from "@/components/layout/Footer";
-import { BackgroundBlob } from "@/components/layout/BackgroundBlob";
-import { TopBar } from "@/components/layout/TopBar";
 import { Providers } from "@/components/Providers";
-import { FriendsDrawer } from "@/components/layout/FriendsDrawer";
-import { GameModeWrapper } from "@/components/layout/GameModeWrapper";
-import { GameModeMain } from "@/components/layout/GameModeMain";
 import { getSiteConfig } from "@/lib/firebase/siteConfig";
+import { SiteLayout } from '@/components/layout/SiteLayout';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,10 +32,17 @@ export async function generateMetadata(): Promise<Metadata> {
       description: config.siteDescription,
       images: config.logoUrl ? [config.logoUrl] : [],
     },
+    icons: {
+      icon: [
+        { url: `${config.faviconUrl || '/favicon.ico'}?v=${Date.now()}`, type: 'image/x-icon' },
+        { url: `${config.faviconUrl || '/favicon.ico'}?v=${Date.now()}`, rel: 'shortcut icon', type: 'image/x-icon' },
+      ],
+      apple: [
+        { url: `${config.faviconUrl || '/favicon.ico'}?v=${Date.now()}` },
+      ],
+    },
   };
 }
-
-import { TorchOverlay } from "@/components/layout/TorchOverlay";
 
 export default async function RootLayout({
   children,
@@ -60,58 +61,38 @@ export default async function RootLayout({
 
   const primaryRgb = hexToRgb(config.colors.primary);
 
+  // Serialize config to plain object for Client Component prop safety (removes Firebase Timestamps)
+  const serializedConfig = JSON.parse(JSON.stringify(config));
+
   return (
     <html lang="en" className="dark" style={{ scrollBehavior: 'smooth', backgroundColor: config.colors.background }}>
       <head>
-        {/* Anti-Flicker Style Injection */}
-        <style id="theme-variables" dangerouslySetInnerHTML={{
+        <style dangerouslySetInnerHTML={{
           __html: `
           :root {
-            --background: ${config.colors.background};
-            --foreground: ${config.colors.text};
             --primary: ${config.colors.primary};
             --primary-rgb: ${primaryRgb};
             --secondary: ${config.colors.secondary};
             --accent: ${config.colors.accent};
+            --background: ${config.colors.background};
+            --foreground: ${config.colors.text};
             --card: ${config.colors.surface};
-            --text-muted: ${config.colors.textMuted};
-            --border: ${config.colors.text}; /* Default high contrast border */
-            
-            /* Neo-Brutalist Theme Variables */
-            --border-width: ${config.theme.borderWidth};
+            --border: ${config.colors.text};
             --border-radius: ${config.theme.borderRadius};
-            --box-shadow: ${config.theme.boxShadow};
-          }
-          html {
-            background-color: ${config.colors.background};
-            color: ${config.colors.text};
+            --border-width: ${config.theme.borderWidth};
           }
         `}} />
+        <link rel="icon" type="image/x-icon" href={`${config.faviconUrl || '/favicon.ico'}?v=${Date.now()}`} />
+        <link rel="shortcut icon" type="image/x-icon" href={`${config.faviconUrl || '/favicon.ico'}?v=${Date.now()}`} />
+        <link rel="apple-touch-icon" href={`${config.faviconUrl || '/favicon.ico'}?v=${Date.now()}`} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-background text-foreground`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col text-foreground`}
       >
-        <Providers>
-          <TorchOverlay />
-          <div className="bg-grain" />
-          <BackgroundBlob />
-          <TopBar />
-          <div className="relative z-10 bg-background shadow-[0_20px_50px_rgba(0,0,0,0.5)] min-h-screen flex flex-col md:mb-[0] mb-0">
-            <GameModeMain>
-              {children}
-            </GameModeMain>
-            <div id="contact" className="h-px" />
-          </div>
-
-          <footer className="md:sticky md:bottom-0 md:z-0 w-full bg-foreground relative z-20">
-            <Footer />
-          </footer>
-
-
-          <GameModeWrapper>
-            <Navbar />
-            <FriendsDrawer />
-          </GameModeWrapper>
+        <Providers initialConfig={serializedConfig}>
+          <SiteLayout>
+            {children}
+          </SiteLayout>
         </Providers>
       </body>
     </html>

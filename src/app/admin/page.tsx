@@ -416,21 +416,55 @@ function GeneralTab({
     config: SiteConfig;
     updateConfig: (updates: Partial<SiteConfig>) => void;
 }) {
-    const [isUploading, setIsUploading] = useState(false);
+    const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+    const [isUploadingLoader, setIsUploadingLoader] = useState(false);
+    const [isUploadingFavicon, setIsUploadingFavicon] = useState(false);
 
     const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        setIsUploading(true);
+        setIsUploadingLogo(true);
         try {
             const url = await uploadImage(file, 'logos');
             updateConfig({ logoUrl: url });
         } catch (error: unknown) {
-            console.error('Failed to upload image:', error);
-            alert(`Failed to upload image: ${(error as Error).message}`);
+            console.error('Failed to upload logo:', error);
+            alert(`Failed to upload logo: ${(error as Error).message}`);
         } finally {
-            setIsUploading(false);
+            setIsUploadingLogo(false);
+        }
+    };
+
+    const handleLoaderUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploadingLoader(true);
+        try {
+            const url = await uploadImage(file, 'loaders');
+            updateConfig({ loaderUrl: url });
+        } catch (error: unknown) {
+            console.error('Failed to upload loader:', error);
+            alert(`Failed to upload loader: ${(error as Error).message}`);
+        } finally {
+            setIsUploadingLoader(false);
+        }
+    };
+
+    const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploadingFavicon(true);
+        try {
+            const url = await uploadImage(file, 'favicons');
+            updateConfig({ faviconUrl: url });
+        } catch (error: unknown) {
+            console.error('Failed to upload favicon:', error);
+            alert(`Failed to upload favicon: ${(error as Error).message}`);
+        } finally {
+            setIsUploadingFavicon(false);
         }
     };
 
@@ -484,13 +518,87 @@ function GeneralTab({
                                 onChange={handleLogoUpload}
                                 className="hidden"
                                 id="logo-upload"
-                                disabled={isUploading}
+                                disabled={isUploadingLogo}
                             />
                             <label
                                 htmlFor="logo-upload"
-                                className={`flex items-center justify-center p-3 bg-white/10 hover:bg-white/20 border border-gray-700 rounded-lg cursor-pointer transition-colors ${isUploading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                className={`flex items-center justify-center p-3 bg-white/10 hover:bg-white/20 border border-gray-700 rounded-lg cursor-pointer transition-colors ${isUploadingLogo ? 'opacity-50 cursor-not-allowed' : ''}`}
                             >
-                                {isUploading ? (
+                                {isUploadingLogo ? (
+                                    <Loader2 size={24} className="animate-spin text-gray-500" />
+                                ) : (
+                                    <Upload size={24} className="text-gray-300" />
+                                )}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Loader URL (GIF/WebP/PNG)
+                    </label>
+                    <div className="flex gap-2">
+                        <div className="flex-1">
+                            <input
+                                type="url"
+                                value={config.loaderUrl || ''}
+                                onChange={(e) => updateConfig({ loaderUrl: e.target.value })}
+                                placeholder="https://example.com/loader.gif"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            />
+                        </div>
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={handleLoaderUpload}
+                                className="hidden"
+                                id="loader-upload"
+                                disabled={isUploadingLoader}
+                            />
+                            <label
+                                htmlFor="loader-upload"
+                                className={`flex items-center justify-center p-3 bg-white/10 hover:bg-white/20 border border-gray-700 rounded-lg cursor-pointer transition-colors ${isUploadingLoader ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {isUploadingLoader ? (
+                                    <Loader2 size={24} className="animate-spin text-gray-500" />
+                                ) : (
+                                    <Upload size={24} className="text-gray-300" />
+                                )}
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">
+                        Favicon URL (ICO/PNG)
+                    </label>
+                    <div className="flex gap-2">
+                        <div className="flex-1">
+                            <input
+                                type="url"
+                                value={config.faviconUrl || ''}
+                                onChange={(e) => updateConfig({ faviconUrl: e.target.value })}
+                                placeholder="https://example.com/favicon.png"
+                                className="w-full px-4 py-3 bg-white/5 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                            />
+                        </div>
+                        <div className="relative">
+                            <input
+                                type="file"
+                                accept="image/x-icon,image/png,image/gif"
+                                onChange={handleFaviconUpload}
+                                className="hidden"
+                                id="favicon-upload"
+                                disabled={isUploadingFavicon}
+                            />
+                            <label
+                                htmlFor="favicon-upload"
+                                className={`flex items-center justify-center p-3 bg-white/10 hover:bg-white/20 border border-gray-700 rounded-lg cursor-pointer transition-colors ${isUploadingFavicon ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {isUploadingFavicon ? (
                                     <Loader2 size={24} className="animate-spin text-gray-500" />
                                 ) : (
                                     <Upload size={24} className="text-gray-300" />

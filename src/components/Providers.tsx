@@ -7,11 +7,21 @@ import { GameModeProvider } from '@/context/GameModeContext';
 
 import { TorchProvider } from '@/context/TorchContext';
 import { ThemeInitializer } from '@/components/ThemeInitializer';
+import { LoadingScreen } from '@/components/layout/LoadingScreen';
 
-export function Providers({ children }: { children: React.ReactNode }) {
+import { SiteConfig } from '@/lib/firebase/siteConfig';
+
+export function Providers({
+    children,
+    initialConfig
+}: {
+    children: React.ReactNode;
+    initialConfig?: SiteConfig;
+}) {
     return (
         <AuthProvider>
-            <SiteConfigProvider>
+            <SiteConfigProvider initialConfig={initialConfig}>
+                <LoadingScreen />
                 <ThemeInitializer />
                 <GuestNameProvider>
                     <GameModeProvider>

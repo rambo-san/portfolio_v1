@@ -17,19 +17,50 @@ const SiteConfigContext = createContext<SiteConfigContextType>({
     loading: true,
 });
 
-export function SiteConfigProvider({ children }: { children: React.ReactNode }) {
-    const [config, setConfig] = useState<SiteConfig>(defaultConfig);
-    const [loading, setLoading] = useState(true);
+const CACHE_KEY = 'site_branding_cache';
+
+export function SiteConfigProvider({
+    children,
+    initialConfig
+}: {
+    children: React.ReactNode;
+    initialConfig?: SiteConfig;
+}) {
+    const [config, setConfig] = useState<SiteConfig>(initialConfig || defaultConfig);
+    const [loading, setLoading] = useState(!initialConfig);
 
     useEffect(() => {
+        // Handle client-side cache as a side effect to avoid hydration mismatch
+        if (!initialConfig) {
+            const cached = localStorage.getItem(CACHE_KEY);
+            if (cached) {
+                try {
+                    const branding = JSON.parse(cached);
+                    setConfig(prev => ({ ...prev, ...branding }));
+                    setLoading(false);
+                } catch (e) {
+                    console.error('Failed to parse cached branding:', e);
+                }
+            }
+        }
+
         // Subscribe to real-time config updates from Firestore
         const unsubscribe = subscribeSiteConfig((newConfig) => {
             setConfig(newConfig);
             setLoading(false);
+
+            // Cache important branding URLs
+            const brandingToCache = {
+                logoUrl: newConfig.logoUrl,
+                loaderUrl: newConfig.loaderUrl,
+                faviconUrl: newConfig.faviconUrl,
+                colors: newConfig.colors,
+            };
+            localStorage.setItem(CACHE_KEY, JSON.stringify(brandingToCache));
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [initialConfig]);
 
     return (
         <SiteConfigContext.Provider value={{ config, loading }}>

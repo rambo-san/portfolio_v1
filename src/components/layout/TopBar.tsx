@@ -1,25 +1,29 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { usePathname } from 'next/navigation';
 import { UserMenu } from '@/components/auth/UserMenu';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { Sparkles } from 'lucide-react';
-
 import { useSiteConfig } from '@/context/SiteConfigContext';
-
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function TopBar() {
+    const pathname = usePathname();
+    const isAdminPage = pathname?.startsWith('/admin');
+
     const { config, loading } = useSiteConfig();
     const [isAuthOpen, setIsAuthOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
     const { scrollY } = useScroll();
 
-    useMotionValueEvent(scrollY, "change", (latest) => {
+    useMotionValueEvent(scrollY, "change", (latest: number) => {
         setIsScrolled(latest > 20);
     });
+
+    if (isAdminPage) return null;
 
     return (
         <>

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
 import { Service, getServices, SiteConfig } from '@/lib/firebase/siteConfig';
+import { MouseParallax } from '@/components/ui/MouseParallax';
 
 interface ServicesProps {
     config: SiteConfig['services'];
@@ -65,33 +66,35 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
     const IconComponent = (LucideIcons as any)[service.icon] || LucideIcons.HelpCircle;
 
     return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            className="group retro-card bg-card p-0 overflow-hidden border-foreground hover:shadow-[10px_10px_0px_var(--foreground)] transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px]"
-        >
-            <div className="border-b-[length:var(--border-width)] border-foreground p-3 bg-muted/50 flex justify-between items-center group-hover:bg-primary/20 transition-colors">
-                <div className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
-                    SVC_0{index + 1}
-                </div>
-                <LucideIcons.ArrowUpRight size={18} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-
-            <div className="p-8">
-                <div className="w-16 h-16 rounded-[radius:var(--border-radius)] border-[length:var(--border-width)] border-foreground bg-background flex items-center justify-center text-foreground mb-6 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-[4px_4px_0px_var(--foreground)] transition-all duration-300">
-                    <IconComponent size={32} strokeWidth={1.5} />
+        <MouseParallax strength={10} className="h-full">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group retro-card bg-card p-0 overflow-hidden border-foreground hover:shadow-[10px_10px_0px_var(--foreground)] transition-all duration-300 hover:translate-x-[-4px] hover:translate-y-[-4px] h-full"
+            >
+                <div className="border-b-[length:var(--border-width)] border-foreground p-3 bg-muted/50 flex justify-between items-center group-hover:bg-primary/20 transition-colors">
+                    <div className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground group-hover:text-foreground">
+                        SVC_0{index + 1}
+                    </div>
+                    <LucideIcons.ArrowUpRight size={18} className="opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
 
-                <h3 className="text-2xl font-black uppercase text-foreground mb-4 group-hover:text-primary transition-colors">
-                    {service.title}
-                </h3>
+                <div className="p-8">
+                    <div className="w-16 h-16 rounded-[radius:var(--border-radius)] border-[length:var(--border-width)] border-foreground bg-background flex items-center justify-center text-foreground mb-6 group-hover:bg-primary group-hover:text-primary-foreground group-hover:shadow-[4px_4px_0px_var(--foreground)] transition-all duration-300">
+                        <IconComponent size={32} strokeWidth={1.5} />
+                    </div>
 
-                <p className="text-muted-foreground leading-relaxed text-lg group-hover:text-foreground transition-colors">
-                    {service.description}
-                </p>
-            </div>
-        </motion.div>
+                    <h3 className="text-2xl font-black uppercase text-foreground mb-4 group-hover:text-primary transition-colors">
+                        {service.title}
+                    </h3>
+
+                    <p className="text-muted-foreground leading-relaxed text-lg group-hover:text-foreground transition-colors">
+                        {service.description}
+                    </p>
+                </div>
+            </motion.div>
+        </MouseParallax>
     );
 }

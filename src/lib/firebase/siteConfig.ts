@@ -78,6 +78,8 @@ export interface SiteConfig {
     siteName: string;
     siteDescription: string;
     logoUrl?: string;
+    loaderUrl?: string;
+    faviconUrl?: string;
 
     // Colors (CSS custom properties)
     colors: {
@@ -191,6 +193,9 @@ export interface SiteConfig {
 export const defaultConfig: SiteConfig = {
     siteName: 'Developer Portfolio',
     siteDescription: 'A developer portfolio showcasing systems engineering and interactive web experiences.',
+    logoUrl: '',
+    loaderUrl: '',
+    faviconUrl: '',
 
     colors: {
         primary: '#dc2626',      // Red-600 (Your original theme)

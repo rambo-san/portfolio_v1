@@ -8,6 +8,7 @@ import { useSiteConfig } from "@/context/SiteConfigContext";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTorch } from "@/context/TorchContext";
+import { MouseParallax } from "@/components/ui/MouseParallax";
 
 export function Hero() {
     const { config, loading } = useSiteConfig();
@@ -15,7 +16,7 @@ export function Hero() {
     const { isTorchMode, toggleTorchMode } = useTorch();
 
     return (
-        <section id="home" className="min-h-screen pt-32 pb-16 flex flex-col justify-center relative overflow-hidden bg-background">
+        <section id="hero" className="min-h-screen pt-32 pb-16 flex flex-col justify-center relative overflow-hidden bg-background">
             <div className="absolute top-0 w-full border-b-[length:var(--border-width)] border-border bg-card/50 backdrop-blur-sm z-30">
                 <div className="overflow-hidden whitespace-nowrap py-2 flex gap-8">
                     <div className="animate-marquee flex gap-8 text-sm font-mono font-bold uppercase tracking-widest text-muted-foreground">
@@ -57,21 +58,23 @@ export function Hero() {
                             </div>
                         )}
 
-                        <div className="relative">
-                            {loading ? (
-                                <div className="space-y-4">
-                                    <Skeleton className="h-24 w-3/4 rounded-lg bg-muted" />
-                                    <Skeleton className="h-24 w-1/2 rounded-lg bg-muted" />
-                                </div>
-                            ) : (
-                                <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.9] text-foreground mix-blend-difference">
-                                    {hero.title}
-                                    <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient">
-                                        {hero.titleHighlight}
-                                    </span>
-                                </h1>
-                            )}
-                        </div>
+                        <MouseParallax strength={15}>
+                            <div className="relative mt-4">
+                                {loading ? (
+                                    <div className="space-y-4">
+                                        <Skeleton className="h-24 w-3/4 rounded-lg bg-muted" />
+                                        <Skeleton className="h-24 w-1/2 rounded-lg bg-muted" />
+                                    </div>
+                                ) : (
+                                    <h1 className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter leading-[0.9] text-foreground mix-blend-difference">
+                                        {hero.title}
+                                        <span className="block text-transparent bg-clip-text bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient">
+                                            {hero.titleHighlight}
+                                        </span>
+                                    </h1>
+                                )}
+                            </div>
+                        </MouseParallax>
 
                         {loading ? (
                             <div className="space-y-2 max-w-lg mt-4">
@@ -110,59 +113,61 @@ export function Hero() {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="hidden lg:flex lg:col-span-4 justify-center relative"
                     >
-                        <div className="w-full aspect-[4/5] bg-card border-[length:var(--border-width)] border-foreground rounded-[radius:var(--border-radius)] shadow-[12px_12px_0px_var(--foreground)] relative overflow-hidden flex flex-col p-2">
-                            {/* "Window" Header */}
-                            <div className="border-b-[length:var(--border-width)] border-foreground pb-2 mb-2 flex justify-between items-center px-2 bg-muted/50">
-                                <span className="font-mono text-xs font-bold uppercase">profile_v1.0.exe</span>
-                                <div className="flex gap-1">
-                                    <div className="w-3 h-3 border border-foreground bg-red-500 rounded-full" />
-                                    <div className="w-3 h-3 border border-foreground bg-yellow-400 rounded-full" />
-                                    <div className="w-3 h-3 border border-foreground bg-green-500 rounded-full" />
-                                </div>
-                            </div>
-
-                            {/* "Window" Content - A pixelated or abstract representation */}
-                            <div className="flex-1 bg-grid-white/[0.05] relative flex items-center justify-center overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 mix-blend-overlay" />
-                                <div className="text-[10rem] font-black text-foreground/5 select-none absolute z-0 rotate-90">
-                                    DEV
-                                </div>
-                                <div className="z-10 text-center space-y-2 p-6 border-[length:var(--border-width)] border-dashed border-muted-foreground/30 bg-background/80 backdrop-blur-sm rounded-[radius:var(--border-radius)] mx-4">
-                                    <p className="font-mono text-xs text-muted-foreground uppercase">Status</p>
-                                    <p className="font-bold text-xl text-primary">ONLINE</p>
-                                    <div className="h-px w-full bg-border my-2" />
-                                    <p className="font-mono text-xs text-muted-foreground uppercase">Location</p>
-                                    <p className="font-bold text-lg">World Wide Web</p>
-
-                                    {/* Torch Mode Toggle */}
-                                    <div className="flex flex-col items-center gap-2 mt-4 pt-4 border-t border-dashed border-muted-foreground/30">
-                                        <p className="font-mono text-[10px] text-muted-foreground uppercase">
-                                            {isTorchMode ? "LIGHTS ON" : "LIGHTS OFF"}
-                                        </p>
-                                        <button
-                                            onClick={toggleTorchMode}
-                                            className={`group relative w-12 h-6 rounded-full border-2 border-foreground transition-colors duration-300 ${isTorchMode ? 'bg-primary' : 'bg-muted'}`}
-                                            aria-label="Toggle Torch Mode"
-                                        >
-                                            <motion.div
-                                                animate={{
-                                                    x: isTorchMode ? 24 : 0,
-                                                    backgroundColor: isTorchMode ? "#ffffff" : "#000000"
-                                                }}
-                                                className="absolute left-0.5 top-0.5 w-4 h-4 rounded-full border border-foreground"
-                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                                            />
-                                        </button>
+                        <MouseParallax strength={20} className="w-full">
+                            <div className="w-full aspect-[4/5] bg-card border-[length:var(--border-width)] border-foreground rounded-[radius:var(--border-radius)] shadow-[12px_12px_0px_var(--foreground)] relative overflow-hidden flex flex-col p-2">
+                                {/* "Window" Header */}
+                                <div className="border-b-[length:var(--border-width)] border-foreground pb-2 mb-2 flex justify-between items-center px-2 bg-muted/50">
+                                    <span className="font-mono text-xs font-bold uppercase">profile_v1.0.exe</span>
+                                    <div className="flex gap-1">
+                                        <div className="w-3 h-3 border border-foreground bg-red-500 rounded-full" />
+                                        <div className="w-3 h-3 border border-foreground bg-yellow-400 rounded-full" />
+                                        <div className="w-3 h-3 border border-foreground bg-green-500 rounded-full" />
                                     </div>
                                 </div>
-                            </div>
 
-                            {/* "Window" Footer */}
-                            <div className="border-t-[length:var(--border-width)] border-foreground pt-2 mt-2 px-2 flex justify-between font-mono text-[10px] text-muted-foreground">
-                                <span>CPU: 12%</span>
-                                <span>MEM: 440MB</span>
+                                {/* "Window" Content - A pixelated or abstract representation */}
+                                <div className="flex-1 bg-grid-white/[0.05] relative flex items-center justify-center overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-accent/20 mix-blend-overlay" />
+                                    <div className="text-[10rem] font-black text-foreground/5 select-none absolute z-0 rotate-90">
+                                        DEV
+                                    </div>
+                                    <div className="z-10 text-center space-y-2 p-6 border-[length:var(--border-width)] border-dashed border-muted-foreground/30 bg-background/80 backdrop-blur-sm rounded-[radius:var(--border-radius)] mx-4">
+                                        <p className="font-mono text-xs text-muted-foreground uppercase">Status</p>
+                                        <p className="font-bold text-xl text-primary">ONLINE</p>
+                                        <div className="h-px w-full bg-border my-2" />
+                                        <p className="font-mono text-xs text-muted-foreground uppercase">Location</p>
+                                        <p className="font-bold text-lg">World Wide Web</p>
+
+                                        {/* Torch Mode Toggle */}
+                                        <div className="flex flex-col items-center gap-2 mt-4 pt-4 border-t border-dashed border-muted-foreground/30">
+                                            <p className="font-mono text-[10px] text-muted-foreground uppercase">
+                                                {isTorchMode ? "LIGHTS ON" : "LIGHTS OFF"}
+                                            </p>
+                                            <button
+                                                onClick={toggleTorchMode}
+                                                className={`group relative w-12 h-6 rounded-full border-2 border-foreground transition-colors duration-300 ${isTorchMode ? 'bg-primary' : 'bg-muted'}`}
+                                                aria-label="Toggle Torch Mode"
+                                            >
+                                                <motion.div
+                                                    animate={{
+                                                        x: isTorchMode ? 24 : 0,
+                                                        backgroundColor: isTorchMode ? "#ffffff" : "#000000"
+                                                    }}
+                                                    className="absolute left-0.5 top-0.5 w-4 h-4 rounded-full border border-foreground"
+                                                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                                />
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* "Window" Footer */}
+                                <div className="border-t-[length:var(--border-width)] border-foreground pt-2 mt-2 px-2 flex justify-between font-mono text-[10px] text-muted-foreground">
+                                    <span>CPU: 12%</span>
+                                    <span>MEM: 440MB</span>
+                                </div>
                             </div>
-                        </div>
+                        </MouseParallax>
                     </motion.div>
                 </div>
             </div>

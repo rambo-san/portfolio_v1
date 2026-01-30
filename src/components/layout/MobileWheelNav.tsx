@@ -151,50 +151,12 @@ export function MobileWheelNav({ items, activeId, onSelect }: MobileWheelNavProp
     useEffect(() => {
         if (isDragging) return;
 
-        const currentRot = rotation.get();
+        // Find the direct slot for the active item
+        const targetIndex = displayItems.findIndex(item => item.id === activeId);
+        if (targetIndex === -1) return;
 
-        // Find all "slots" where the active item exists
-        // (Since we duplicated items, it appears multiple times)
-        const targetIndices = displayItems
-            .map((item, idx) => item.id === activeId ? idx : -1)
-            .filter(idx => idx !== -1);
-
-        if (targetIndices.length === 0) return;
-
-        // Find the "closest" slot to the current rotation
-        // A slot is at angle: -index * SPACING
-        // Note: The wheel spins, so -index*SPACING can be offset by multiples of 360
-        // ACTUALLY:
-        // We want to find a target rotation R_t such that:
-        // 1. R_t corresponds to one of the target indices
-        // 2. |R_t - currentRot| is minimized.
-
-        let bestTarget = currentRot;
-        let minDiff = Infinity;
-
-        targetIndices.forEach(idx => {
-            const baseAngle = -(idx * ITEM_SPACING);
-
-            // We can add/subtract 360 to this baseAngle to find the closest alias
-            // diff = baseAngle - currentRot
-            // We want (baseAngle + k*360) - currentRot to be small.
-            // Let delta = baseAngle - currentRot
-            // We want (delta + k*360) to be in [-180, 180]
-
-            const diff = baseAngle - currentRot;
-            // Normalize diff to -180...180 range
-            const normalizedDiff = ((diff % 360) + 540) % 360 - 180;
-
-            // The candidate target rotation is currentRot + normalizedDiff
-            const candidate = currentRot + normalizedDiff;
-
-            if (Math.abs(normalizedDiff) < minDiff) {
-                minDiff = Math.abs(normalizedDiff);
-                bestTarget = candidate;
-            }
-        });
-
-        animate(rotation, bestTarget, { type: "spring", damping, stiffness });
+        const targetAngle = -(targetIndex * ITEM_SPACING);
+        animate(rotation, targetAngle, { type: "spring", damping, stiffness });
 
     }, [activeId, displayItems, ITEM_SPACING, isDragging, rotation]);
 
